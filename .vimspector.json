@@ -1,0 +1,14 @@
+{
+  "configurations": {
+    "Launch": {
+      "adapter": "vscode-cpptools",
+      "configuration": {
+        "request": "launch",
+        "program": "out/clang/debug/vermillon",
+        "cwd": "/home/wmbat/projects/vermillon",
+        "externalConsole": true,
+        "MIMode": "gdb"
+      }
+    }
+  }
+}

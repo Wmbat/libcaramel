@@ -1,0 +1,3 @@
+# libcaeruleum
+
+C++ library

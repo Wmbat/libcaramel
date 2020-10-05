@@ -1,0 +1,10 @@
+: 1
+name: libcaeruleum
+version: 0.1.0-a.0.z
+summary: caeruleum C++ library
+license: other: proprietary ; Not free/open source.
+description-file: README.md
+email: wmbat@protonmail.com
+depends: * build2 >= 0.13.0
+depends: * bpkg >= 0.13.0
+depends: doctest ^2.3.6

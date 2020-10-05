@@ -1,0 +1,71 @@
+[
+ {
+  "directory": "/home/wmbat/projects/libcaeruleum",
+  "arguments": [
+   "clang++",
+   "-I/home/wmbat/projects/debug/libcaeruleum/clang/libcaeruleum",
+   "-I/home/wmbat/projects/libcaeruleum",
+   "-DLIBCAERULEUM_SHARED",
+   "-I/home/wmbat/projects/debug/libcaeruleum/clang/doctest-2.3.6/upstream",
+   "-O0",
+   "-g",
+   "-Wall",
+   "-Wextra",
+   "-Werror",
+   "-fno-omit-frame-pointer",
+   "-fsanitize=address",
+   "-std=c++2a",
+   "-o",
+   "../debug/libcaeruleum/clang/libcaeruleum/tests/basics/driver.o",
+   "-c",
+   "-x",
+   "c++",
+   "/home/wmbat/projects/libcaeruleum/tests/basics/driver.cpp"
+  ],
+  "file": "/home/wmbat/projects/libcaeruleum/tests/basics/driver.cpp"
+ },
+ {
+  "directory": "/home/wmbat/projects/libcaeruleum",
+  "arguments": [
+   "clang++",
+   "-I/home/wmbat/projects/debug/libcaeruleum/clang/doctest-2.3.6/upstream",
+   "-O0",
+   "-g",
+   "-Wall",
+   "-Wextra",
+   "-Werror",
+   "-fno-omit-frame-pointer",
+   "-fsanitize=address",
+   "-std=c++2a",
+   "-o",
+   "../debug/libcaeruleum/clang/doctest-2.3.6/tests/tutorial.o",
+   "-c",
+   "-x",
+   "c++",
+   "/home/wmbat/projects/debug/libcaeruleum/clang/doctest-2.3.6/tests/tutorial.cpp"
+  ],
+  "file": "/home/wmbat/projects/debug/libcaeruleum/clang/doctest-2.3.6/tests/tutorial.cpp"
+ },
+ {
+  "directory": "/home/wmbat/projects/libcaeruleum",
+  "arguments": [
+   "clang++",
+   "-I/home/wmbat/projects/debug/libcaeruleum/clang/doctest-2.3.6/upstream",
+   "-O0",
+   "-g",
+   "-Wall",
+   "-Wextra",
+   "-Werror",
+   "-fno-omit-frame-pointer",
+   "-fsanitize=address",
+   "-std=c++2a",
+   "-o",
+   "../debug/libcaeruleum/clang/doctest-2.3.6/tests/subcases.o",
+   "-c",
+   "-x",
+   "c++",
+   "/home/wmbat/projects/debug/libcaeruleum/clang/doctest-2.3.6/tests/subcases.cpp"
+  ],
+  "file": "/home/wmbat/projects/debug/libcaeruleum/clang/doctest-2.3.6/tests/subcases.cpp"
+ }
+]
