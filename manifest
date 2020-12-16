@@ -1,10 +1,12 @@
 : 1
 name: libcaeruleum
 version: 0.1.0-a.0.z
-summary: caeruleum C++ library
+summary: A library of C++ data structures and containers complient with the C++ STL
 license: other: proprietary ; Not free/open source.
 description-file: README.md
 email: wmbat@protonmail.com
+requires: C++20
 depends: * build2 >= 0.13.0
 depends: * bpkg >= 0.13.0
-depends: doctest ^2.3.6
+depends: doctest ^2.4.0
+depends: monads ^0.1.0

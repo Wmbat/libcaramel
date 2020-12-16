@@ -1,3 +1,8 @@
+/**
+ * @mainpage libcaeruleum
+ * This is the main page for the project.
+ */
+
 #pragma once
 
 #include <iosfwd>
@@ -5,10 +10,4 @@
 
 #include <libcaeruleum/export.hpp>
 
-namespace caeruleum
-{
-   /*
-  LIBCAERULEUM_SYMEXPORT void
-  say_hello (std::ostream&, const std::string& name);
-  */
-}
+#include <libcaeruleum/containers/dynamic_array.hpp>

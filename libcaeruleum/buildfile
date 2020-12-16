@@ -1,5 +1,6 @@
 intf_libs = # Interface dependencies.
-impl_libs = # Implementation dependencies.
+# impl_libs = # Implementation dependencies.
+import impl_libs + monads%lib{monads}
 #import impl_libs += libhello%lib{hello}
 
 ./: lib{caeruleum}: libul{caeruleum}: {hxx ixx txx cxx}{** -**.test... -version} \

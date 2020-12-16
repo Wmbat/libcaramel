@@ -3,10 +3,13 @@
   "directory": "/home/wmbat/projects/libcaeruleum",
   "arguments": [
    "clang++",
+   "-I/home/wmbat/projects/debug/libcaeruleum/clang/monads-0.1.0",
+   "-I/home/wmbat/projects/debug/libcaeruleum/clang/monads-0.1.0",
+   "-DMONADS_SHARED",
    "-I/home/wmbat/projects/debug/libcaeruleum/clang/libcaeruleum",
    "-I/home/wmbat/projects/libcaeruleum",
    "-DLIBCAERULEUM_SHARED",
-   "-I/home/wmbat/projects/debug/libcaeruleum/clang/doctest-2.3.6/upstream",
+   "-I/home/wmbat/projects/debug/libcaeruleum/clang/doctest-2.4.0/upstream",
    "-O0",
    "-g",
    "-Wall",
@@ -28,7 +31,10 @@
   "directory": "/home/wmbat/projects/libcaeruleum",
   "arguments": [
    "clang++",
-   "-I/home/wmbat/projects/debug/libcaeruleum/clang/doctest-2.3.6/upstream",
+   "-I/home/wmbat/projects/debug/libcaeruleum/clang/monads-0.1.0",
+   "-I/home/wmbat/projects/debug/libcaeruleum/clang/monads-0.1.0",
+   "-DMONADS_SHARED",
+   "-I/home/wmbat/projects/debug/libcaeruleum/clang/doctest-2.4.0/upstream",
    "-O0",
    "-g",
    "-Wall",
@@ -36,21 +42,21 @@
    "-Werror",
    "-fno-omit-frame-pointer",
    "-fsanitize=address",
-   "-std=c++2a",
+   "-std=c++20",
    "-o",
-   "../debug/libcaeruleum/clang/doctest-2.3.6/tests/tutorial.o",
+   "../debug/libcaeruleum/clang/monads-0.1.0/tests/monads/main.o",
    "-c",
    "-x",
    "c++",
-   "/home/wmbat/projects/debug/libcaeruleum/clang/doctest-2.3.6/tests/tutorial.cpp"
+   "/home/wmbat/projects/debug/libcaeruleum/clang/monads-0.1.0/tests/monads/main.cpp"
   ],
-  "file": "/home/wmbat/projects/debug/libcaeruleum/clang/doctest-2.3.6/tests/tutorial.cpp"
+  "file": "/home/wmbat/projects/debug/libcaeruleum/clang/monads-0.1.0/tests/monads/main.cpp"
  },
  {
   "directory": "/home/wmbat/projects/libcaeruleum",
   "arguments": [
    "clang++",
-   "-I/home/wmbat/projects/debug/libcaeruleum/clang/doctest-2.3.6/upstream",
+   "-I/home/wmbat/projects/debug/libcaeruleum/clang/doctest-2.4.0/upstream",
    "-O0",
    "-g",
    "-Wall",
@@ -60,12 +66,34 @@
    "-fsanitize=address",
    "-std=c++2a",
    "-o",
-   "../debug/libcaeruleum/clang/doctest-2.3.6/tests/subcases.o",
+   "../debug/libcaeruleum/clang/doctest-2.4.0/tests/subcases.o",
    "-c",
    "-x",
    "c++",
-   "/home/wmbat/projects/debug/libcaeruleum/clang/doctest-2.3.6/tests/subcases.cpp"
+   "/home/wmbat/projects/debug/libcaeruleum/clang/doctest-2.4.0/tests/subcases.cpp"
   ],
-  "file": "/home/wmbat/projects/debug/libcaeruleum/clang/doctest-2.3.6/tests/subcases.cpp"
+  "file": "/home/wmbat/projects/debug/libcaeruleum/clang/doctest-2.4.0/tests/subcases.cpp"
+ },
+ {
+  "directory": "/home/wmbat/projects/libcaeruleum",
+  "arguments": [
+   "clang++",
+   "-I/home/wmbat/projects/debug/libcaeruleum/clang/doctest-2.4.0/upstream",
+   "-O0",
+   "-g",
+   "-Wall",
+   "-Wextra",
+   "-Werror",
+   "-fno-omit-frame-pointer",
+   "-fsanitize=address",
+   "-std=c++2a",
+   "-o",
+   "../debug/libcaeruleum/clang/doctest-2.4.0/tests/tutorial.o",
+   "-c",
+   "-x",
+   "c++",
+   "/home/wmbat/projects/debug/libcaeruleum/clang/doctest-2.4.0/tests/tutorial.cpp"
+  ],
+  "file": "/home/wmbat/projects/debug/libcaeruleum/clang/doctest-2.4.0/tests/tutorial.cpp"
  }
 ]

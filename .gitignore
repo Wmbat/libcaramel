@@ -23,3 +23,13 @@
 *.exe.dlls/
 *.exe.manifest
 *.pc
+
+# Local folders
+#
+.cache/
+.clangd/
+documentation/
+
+# Local files
+#
+.vimspector.json

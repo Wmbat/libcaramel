@@ -1,4 +1,5 @@
-import libs = libcaeruleum%lib{caeruleum}
+import libs = monads%lib{monads}
+import libs += libcaeruleum%lib{caeruleum}
 import libs += doctest%lib{doctest}
 
 exe{driver}: {hxx ixx txx cxx}{**} $libs testscript{**}
