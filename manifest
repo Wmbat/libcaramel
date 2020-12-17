@@ -2,7 +2,7 @@
 name: libcaramel
 version: 0.1.0-a.0.z
 summary: A library of C++ data structures and containers complient with the C++ STL
-license: other: proprietary ; Not free/open source.
+license: MIT ; MIT License
 description-file: README.md
 email: wmbat@protonmail.com
 requires: C++20
