@@ -3,8 +3,6 @@
 #include <libcaeruleum/assert.hpp>
 #include <libcaeruleum/iterators/random_access.hpp>
 
-#include <monads/result.hpp>
-
 #include <algorithm>
 #include <concepts>
 #include <cstdint>
@@ -33,9 +31,9 @@ namespace crl
       using allocator_traits = std::allocator_traits<Allocator>;
 
    public:
-      using value_type = Any; /**< The type of the elements store in the basic_dynamic_array */
-      using size_type = std::size_t;          /**< unsigned integer type */
-      using difference_type = std::ptrdiff_t; /**< signed integer type */
+      using value_type = Any;
+      using size_type = std::size_t;
+      using difference_type = std::ptrdiff_t;
       using allocator_type = Allocator;
       using reference = value_type&;
       using const_reference = const value_type&;
@@ -199,6 +197,11 @@ namespace crl
          reset_to_static();
       }
 
+      /**
+       * @brief Replaces the contents with an copy of the contents of rhs.
+       *
+       * @param[in] rhs other container to use as a data source.
+       */
       constexpr auto operator=(const basic_dynamic_array& rhs) -> basic_dynamic_array&
       {
          if (this != &rhs)
@@ -210,6 +213,11 @@ namespace crl
          return *this;
       }
 
+      /**
+       * @brief Replaces the contents with those of other using move semantics.
+       *
+       * @param[in] rhs other container to use as a data source.
+       */
       constexpr auto operator=(basic_dynamic_array&& rhs) noexcept(
          allocator_type::propagate_on_container_move_assignment::value ||
          allocator_type::is_always_equal::value) -> basic_dynamic_array&
@@ -268,24 +276,24 @@ namespace crl
       constexpr auto data() const noexcept -> const_pointer { return const_pointer{&(*cbegin())}; }
 
       /**
-       * @brief Get an iterator to the first element of the basic_dynamic_array.
+       * @brief Returns an iterator to the first element of the basic_dynamic_array.
        *
        * @return An iterator to the first element of the basic_dynamic_array. If the
        * basic_dynamic_array is empty, the iterator will be equal to end().
        */
       constexpr auto begin() noexcept -> iterator { return iterator{mp_begin}; }
       /**
-       * @brief Get an const_iterator to the first element of the basic_dynamic_array.
+       * @brief Returns an iterator to the first element of the basic_dynamic_array.
        *
        * @return A const_iterator to the first element of the basic_dynamic_array. If the
        * basic_dynamic_array is empty, the const_iterator will be equal to end().
        */
       constexpr auto begin() const noexcept -> const_iterator { return const_iterator{mp_begin}; }
       /**
-       * @brief Get an const_iterator to the first element of the basic_dynamic_array.
+       * @brief Returns an iterator to the first element of the basic_dynamic_array.
        *
-       * @return A const_iterator to the first element of the basic_dynamic_array. If the
-       * basic_dynamic_array is empty, the const_iterator will be equal to end().
+       * @return iterator to the first element. If the basic_dynamic_array is empty, the
+       * const_iterator will be equal to end().
        */
       constexpr auto cbegin() const noexcept -> const_iterator { return const_iterator{mp_begin}; }
 
@@ -293,48 +301,94 @@ namespace crl
        * @brief Get an iterator to the element following the last element of the
        * basic_dynamic_array.
        *
-       * @return An iterator to the element following the last element of the basic_dynamic_array.
-       * Attempting to access it results in undefined behaviour.
+       * @return iterator to the element following the last element. Attempting to access it results
+       * in undefined behaviour.
        */
       constexpr auto end() noexcept -> iterator { return iterator{mp_begin + m_size}; }
       /**
-       * @brief Get a const_iterator to the element following the last element of the
+       * @brief Return an iterator to the element following the last element of the
        * basic_dynamic_array.
        *
-       * @return A const_iterator to the element following the last element of the
-       * basic_dynamic_array. Attempting to access it results in undefined behaviour.
+       * @return iterator to the element following the last element. Attempting to access it results
+       * in undefined behaviour.
        */
       constexpr auto end() const noexcept -> const_iterator
       {
          return const_iterator{mp_begin + m_size};
       }
       /**
-       * @brief Get a const_iterator to the element following the last element of the
+       * @brief Returns an it iterator to the element following the last element of the
        * basic_dynamic_array.
        *
-       * @return A const_iterator to the element following the last element of the
-       * basic_dynamic_array. Attempting to access it results in undefined behaviour.
+       * @return iterator to the element following the last element. Attempting to access it results
+       * in undefined behaviour.
        */
       constexpr auto cend() const noexcept -> const_iterator
       {
          return const_iterator{mp_begin + m_size};
       }
 
+      /**
+       * @brief Returns a reverse iterator to the first element of the reversed basic_dynamic_array.
+       * It corresponds to the last element of the non-reversed basic_dynamic_array. If the
+       * basic_dynamic_array is empty, the returned iterator is equal to rend().
+       *
+       * @return Reverse iterator to the first element.
+       */
       constexpr auto rbegin() noexcept -> reverse_iterator { return reverse_iterator{end()}; }
+      /**
+       * @brief Returns a reverse_iterator to the first element of the reversed basic_dynamic_array.
+       * It corresponds to the last element of the non-reversed basic_dynamic_array. If the
+       * basic_dynamic_array is empty, the returned iterator is equal to rend().
+       *
+       * @return reverse_iterator to the first element.
+       */
       constexpr auto rbegin() const noexcept -> const_reverse_iterator
       {
          return const_reverse_iterator{cend()};
       }
+      /**
+       * @brief Returns a reverse iterator to the first element of the reversed
+       * basic_dynamic_array. It corresponds to the last element of the non-reversed
+       * basic_dynamic_array. If the basic_dynamic_array is empty, the returned iterator is equal to
+       * rend().
+       *
+       * @return Reverse iterator to the first element.
+       */
       constexpr auto rcbegin() const noexcept -> const_reverse_iterator
       {
          return const_reverse_iterator{cend()};
       }
 
+      /**
+       * @brief Returns a reverse iterator to the element following the last element of the reversed
+       * basic_dynamic_array. It corresponds to the element preceding the first element of the
+       * non-reversed basic_dynamic_array. This element acts as a placeholder, attempting to access
+       * it results in UB.
+       *
+       * @return Reverse iterator to the element following the last element.
+       */
       constexpr auto rend() noexcept -> reverse_iterator { return reverse_iterator{begin()}; }
+      /**
+       * @brief Returns a reverse iterator to the element following the last element of the reversed
+       * basic_dynamic_array. It corresponds to the element preceding the first element of the
+       * non-reversed basic_dynamic_array. This element acts as a placeholder, attempting to access
+       * it results in UB.
+       *
+       * @return Reverse iterator to the element following the last element.
+       */
       constexpr auto rend() const noexcept -> const_reverse_iterator
       {
          return const_reverse_iterator{cbegin()};
       }
+      /**
+       * @brief Returns a reverse iterator to the element following the last element of the reversed
+       * basic_dynamic_array. It corresponds to the element preceding the first element of the
+       * non-reversed basic_dynamic_array. This element acts as a placeholder, attempting to access
+       * it results in UB.
+       *
+       * @return Reverse iterator to the element following the last element.
+       */
       constexpr auto rcend() const noexcept -> const_reverse_iterator
       {
          return const_reverse_iterator{cbegin()};
@@ -345,7 +399,7 @@ namespace crl
        *
        * @return True if the container is empty, false otherwise.
        */
-      [[nodiscard]] constexpr auto is_empty() const noexcept -> bool { return begin() == end(); };
+      [[nodiscard]] constexpr auto empty() const noexcept -> bool { return begin() == end(); };
       /**
        * @brief Check the number of elements stored in the basic_dynamic_array.
        *
@@ -370,10 +424,481 @@ namespace crl
        */
       constexpr void reserve(size_type new_cap);
 
+      /**
+       * @brief Erases all elements from the container, After this call, size() returs zero.
+       */
       constexpr void clear() noexcept
       {
          destroy(begin(), end());
          m_size = 0;
+      }
+
+      /**
+       * @brief Inserts an element value at the position before pos in the container.
+       *
+       * @pre pos >= begin()
+       * @pre pos <= end()
+       *
+       * @param[in] pos Iterator before which the content will be inserted. pos may be the end()
+       * iterator.
+       * @param[in] value Element value to insert.
+       *
+       * @return Iterator pointing to the inserted value.
+       */
+      constexpr auto insert(const_iterator pos, const_reference value) -> iterator
+      {
+         EXPECT(pos >= cbegin());
+         EXPECT(pos <= cend());
+
+         if (pos == cend())
+         {
+            push_back(value);
+
+            return end() - 1;
+         }
+
+         iterator new_pos;
+         if (size() >= capacity())
+         {
+            size_type offset = pos - cbegin();
+            grow();
+            new_pos = begin() + offset;
+         }
+         else
+         {
+            new_pos = begin() + (pos - cbegin());
+         }
+
+         construct(offset(size()), std::move(*(end() - 1)));
+
+         std::move_backward(new_pos, end() - 1, end());
+
+         ++m_size;
+
+         const_pointer p_element = &value;
+         if (pointer{&(*new_pos)} <= p_element && pointer{&(*end())} > p_element)
+         {
+            ++p_element;
+         }
+
+         *new_pos = *p_element;
+
+         return new_pos;
+      }
+
+      /**
+       * @brief Inserts an element value at the position before pos in the container.
+       *
+       * @pre pos >= begin()
+       * @pre pos <= end()
+       *
+       * @param[in] pos Iterator before which the content will be inserted. pos may be the end()
+       * iterator.
+       * @param[in] value Element value to insert.
+       *
+       * @return Iterator pointing to the inserted value.
+       */
+      constexpr auto insert(const_iterator pos, value_type&& value) -> iterator
+      {
+         EXPECT(pos >= cbegin());
+         EXPECT(pos <= cend());
+
+         if (pos == cend())
+         {
+            push_back(std::move(value));
+
+            return end() - 1;
+         }
+
+         iterator new_pos;
+         if (size() >= capacity())
+         {
+            size_type offset = pos - cbegin();
+            grow();
+            new_pos = begin() + offset;
+         }
+         else
+         {
+            new_pos = begin() + (pos - cbegin());
+         }
+
+         construct(offset(size()), std::move(*(end() - 1)));
+
+         std::move_backward(new_pos, end() - 1, end());
+
+         ++m_size;
+
+         pointer p_element = &value;
+         if (pointer{&(*new_pos)} <= p_element && pointer{&(*end())} > p_element)
+         {
+            ++p_element;
+         }
+
+         *new_pos = std::move(*p_element);
+
+         return new_pos;
+      }
+      /**
+       * @brief Insert a new element into the container directly before pos. The element is
+       * constructed in-place using the arguments Args... that are forwarded to the constructor.
+       *
+       * @pre pos >= begin()
+       * @pre pos <= end()
+       *
+       * @param[in] pos Iterator before which the content will be inserted. pos may be the end()
+       * @param[in] args Arguments to forward to the constructor of the element.
+       *
+       * @return Iterator pointing to the inserted value.
+       */
+      template <typename... Args>
+      constexpr auto insert(const_iterator pos, Args... args) -> iterator
+      {
+         EXPECT(pos >= cbegin());
+         EXPECT(pos <= cend());
+
+         if (pos == cend())
+         {
+            emplace_back(std::forward<Args>(args)...);
+
+            return end() - 1;
+         }
+
+         iterator new_pos;
+         if (size() >= capacity())
+         {
+            size_type offset = pos - cbegin();
+            grow();
+            new_pos = begin() + offset;
+         }
+         else
+         {
+            new_pos = begin() + (pos - cbegin());
+         }
+
+         new (&(*end())) value_type(std::move(*(end() - 1)));
+
+         std::move_backward(new_pos, end() - 1, end());
+
+         ++m_size;
+
+         *new_pos = value_type(std::forward<Args>(args)...);
+
+         return new_pos;
+      }
+      /**
+       * @brief Inserts count elements from a specified value.
+       *
+       * @pre pos >= begin()
+       * @pre pos <= end()
+       *
+       * @param[in] pos Iterator before which the content will be inserted. pos may be the end()
+       * iterator.
+       * @param[in] count The number of elements to insert.
+       * @param[in] value Element value to insert.
+       *
+       * @return Iterator pointing to the first element inserted.
+       */
+      constexpr auto insert(const_iterator pos, size_type count, const_reference value) -> iterator
+      {
+         EXPECT(pos >= cbegin());
+         EXPECT(pos <= cend());
+
+         size_type start_index = pos - cbegin();
+
+         if (pos == cend())
+         {
+            if (size() + count >= capacity())
+            {
+               grow(size() + count);
+            }
+
+            std::uninitialized_fill_n(end(), count, value);
+
+            m_size += count;
+
+            return begin() + start_index;
+         }
+
+         reserve(size() + count);
+
+         iterator updated_pos = begin() + start_index;
+
+         if (iterator old_end = end(); end() - updated_pos >= count)
+         {
+            std::uninitialized_move(end() - count, end(), end());
+
+            m_size += count;
+
+            std::move_backward(updated_pos, old_end - count, old_end);
+            std::fill_n(updated_pos, count, value);
+         }
+         else
+         {
+            size_type move_count = old_end - updated_pos;
+            m_size += count;
+
+            std::uninitialized_move(updated_pos, old_end, end() - move_count);
+            std::fill_n(updated_pos, move_count, value);
+            std::uninitialized_fill_n(old_end, count - move_count, value);
+         }
+
+         return updated_pos;
+      }
+
+      /**
+       * @brief Inserts elements from a range [first, last) before pos.
+       *
+       * @pre pos >= begin()
+       * @pre pos <= end()
+       *
+       * @param[in] pos Iterator before which the content will be inserted. pos may be the end()
+       * iterator.
+       * @param[in] first The first value to insert
+       * @param[in] last One past the last value to insert.
+       *
+       * @return Iterator pointing to the first element inserted.
+       */
+      template <std::input_iterator InputIt>
+      constexpr auto insert(const_iterator pos, InputIt first, InputIt last) -> iterator
+      {
+         EXPECT(pos >= cbegin());
+         EXPECT(pos <= cend());
+
+         size_type start_index = pos - cbegin();
+         difference_type count = std::distance(first, last);
+
+         if (pos == cend())
+         {
+            if (size() + count >= capacity())
+            {
+               grow(size() + count);
+            }
+
+            std::uninitialized_copy(first, last, end());
+
+            m_size += count;
+
+            return begin() + start_index;
+         }
+
+         reserve(size() + count);
+
+         iterator updated_pos = begin() + start_index;
+         if (iterator old_end = end(); end() - updated_pos >= count)
+         {
+            std::uninitialized_move(end() - count, end(), end());
+
+            m_size += count;
+
+            std::move_backward(updated_pos, old_end - count, old_end);
+            std::copy(first, last, updated_pos);
+         }
+         else
+         {
+            size_type move_count = old_end - updated_pos;
+            m_size += count;
+
+            std::uninitialized_move(updated_pos, old_end, end() - move_count);
+
+            for (auto it = updated_pos; count > 0; --count)
+            {
+               *it = *first;
+
+               ++it;
+               ++first;
+            }
+
+            std::uninitialized_copy(first, last, old_end);
+         }
+
+         return updated_pos;
+      }
+
+      /**
+       * @brief Insert elements from an initializer_list before the position pos.
+       *
+       * @pre pos >= begin()
+       * @pre pos <= end()
+       *
+       * @param[in] pos Iterator before which the content will be inserted. pos may be the end()
+       * iterator.
+       * @param[in] init_list Initializer list to insert the values from.
+       *
+       * @return Iterator pointing to the first element inserted.
+       */
+      constexpr auto insert(const_iterator pos, std::initializer_list<value_type> init_list)
+         -> iterator
+      {
+         return insert(pos, init_list.begin(), init_list.end());
+      }
+
+      /**
+       * @brief Erases the specified element from the container.
+       *
+       * @pre pos >= begin()
+       * @pre pos <= end()
+       *
+       * @param[in] pos Iterator to the element to remove.
+       */
+      constexpr auto erase(const_iterator pos) -> iterator
+      {
+         EXPECT(pos >= cbegin());
+         EXPECT(pos <= cend());
+
+         if (pos == cend())
+         {
+            return end();
+         }
+
+         auto it = begin() + (pos - cbegin());
+
+         std::move(it + 1, end(), it);
+
+         pop_back();
+
+         return it;
+      }
+      /**
+       * @brief Erases the specified elements from the container.
+       *
+       * @pre first >= begin()
+       * @pre last <= end()
+       * @pre first >= last
+       *
+       * @param[in] first The first element of the range to copy from.
+       * @param[in] last One past the last element of the range to copy from.
+       *
+       * @return Iterator following the last removed element. If last == end() prior to removal,
+       * then the updated end() iterator is returned. If [first, last) is an empty range, the last
+       * iterator is returned.
+       */
+      constexpr auto erase(const_iterator first, const_iterator last) -> iterator
+      {
+         EXPECT(first >= cbegin());
+         EXPECT(last <= cend());
+         EXPECT(first >= last);
+
+         if (first == last)
+         {
+            return begin() + (first - cbegin());
+         }
+
+         size_type const distance = std::distance(first, last);
+
+         iterator it_f = begin() + (first - cbegin());
+         iterator it_l = begin() + (last - cbegin());
+         iterator it = std::move(it_l, end(), it_f);
+
+         destroy(it, end());
+
+         m_size -= distance;
+
+         return it_f;
+      }
+
+      /**
+       * @brief Appends the given element value to the end of the container. The new element is
+       * initialized as a copy of value.
+       *
+       * @param[in] value The value of the element to append.
+       */
+      constexpr void append(const value_type& value) { append(value); }
+      /**
+       * @brief Appends the given element value to the end of the container. Value is moved into the
+       * new element.
+       *
+       * @param[in] value The value of the element to append.
+       */
+      constexpr void append(value_type&& value) { append(std::move(value)); }
+      /**
+       * @brief Appends the given element value to the end of the container. The element is
+       * constructed in-place using the arguments Args... that are forwarded to the constructor.
+       *
+       * @param[in] args Arguments to forward to the constructor of the element.
+       */
+      template <typename... Args>
+      constexpr auto append(Args&&... args) -> reference
+      {
+         if (size() >= capacity())
+         {
+            grow();
+         }
+
+         construct(mp_begin + size(), std::forward<decltype(args)>(args)...);
+
+         ++m_size;
+
+         return *(end() - 1);
+      }
+
+      /**
+       * @brief Removes the last element in the container.
+       *
+       * @pre size() != 0
+       */
+      constexpr void pop_back()
+      {
+         EXPECT(size() != 0);
+
+         destroy(offset(size()));
+         --m_size;
+      };
+
+      /**
+       * @brief Resizes the container to contain count elements. If the current size is greater than
+       * count, the container is reduced to its first count elements. If the current size is less
+       * than count, default constructed elements are appended.
+       *
+       * @param[in] count New size of the container.
+       */
+      constexpr void resize(size_type count)
+      {
+         if (size() > count)
+         {
+            destroy(begin() + count, end());
+            m_size = count;
+         }
+         else if (size() < count)
+         {
+            if (capacity() < count)
+            {
+               grow(count);
+            }
+
+            for (size_type i = size(); i < count; ++i)
+            {
+               construct(offset(i), value_type{});
+            }
+
+            m_size = count;
+         }
+      }
+      /**
+       * @brief Resizes the container to contain count elements. If the current size is greater than
+       * count, the container is reduced to its first count elements. If the current size is less
+       * than count, additional copies of value are appended.
+       *
+       * @param[in] count New size of the container.
+       * @param[in] value The value to initialize new elements with.
+       */
+      constexpr void resize(size_type count, const_reference value)
+      {
+         if (size() > count)
+         {
+            destroy(begin() + count, end());
+            m_size = count;
+         }
+         else if (size() < count)
+         {
+            if (capacity() < count)
+            {
+               grow(count);
+            }
+
+            std::uninitialized_fill(end(), begin() + count, value);
+
+            m_size = count;
+         }
       }
 
    private:
@@ -567,6 +1092,9 @@ namespace crl
          assign(initializer_list.begin(), initializer_list.end());
       }
 
+      constexpr auto offset(size_type i) noexcept -> pointer { return mp_begin + i; }
+      constexpr auto offset(size_type i) const noexcept -> const_pointer { return mp_begin + i; }
+
       static constexpr auto compute_new_capacity(size_type min_capacity) -> size_type
       {
          constexpr auto max_capacity = size_type{1} << (std::numeric_limits<size_type>::digits - 1);
@@ -612,9 +1140,9 @@ namespace crl
       using underlying_type = basic_dynamic_array<Any, Size, std::pmr::polymorphic_allocator<Any>>;
 
    public:
-      using value_type = Any; /**< The type of the elements store in the basic_dynamic_array */
-      using size_type = std::size_t;          /**< unsigned integer type */
-      using difference_type = std::ptrdiff_t; /**< signed integer type */
+      using value_type = Any;
+      using size_type = std::size_t;
+      using difference_type = std::ptrdiff_t;
       using allocator_type = std::pmr::polymorphic_allocator<Any>;
       using reference = value_type&;
       using const_reference = const value_type&;
@@ -639,6 +1167,45 @@ namespace crl
       constexpr small_dynamic_array(size_type count, const_reference value) :
          m_underlying{count, value}
       {}
+      /**
+       * @brief Construct the container with the contents of the initializer list init.
+       *
+       * @param[in] init Initializer list to initialize the elements of the container with.
+       */
+      constexpr small_dynamic_array(std::initializer_list<Any> init) : m_underlying{init} {}
+      /**
+       * @brief Construct the container with the contents of the range [first, last)
+       *
+       * @param[in] first The first element of the range to copy from.
+       * @param[in] last One past the last element of the range to copy from.
+       */
+      template <std::input_iterator InputIt>
+      constexpr small_dynamic_array(InputIt first, InputIt last) : m_underlying{first, last}
+      {}
+
+      /**
+       * @brief Access the object stored at a specific index.
+       *
+       * @param index The position to lookup the object in the array
+       *
+       * @pre index must be less than the size.
+       *
+       * @return A reference to the object stored at index.
+       */
+      constexpr auto lookup(size_type index) -> reference { return m_underlying.lookup(index); }
+      /**
+       * @brief Access the object stored at a specific index.
+       *
+       * @param index The position to lookup the object in the array
+       *
+       * @pre index must be less than the size.
+       *
+       * @return A const reference to the object stored at index.
+       */
+      constexpr auto lookup(size_type index) const -> const_reference
+      {
+         return m_underlying.lookup(index);
+      }
 
       /**
        * @brief Access the data stored by the container.
@@ -656,26 +1223,342 @@ namespace crl
       constexpr auto data() const noexcept -> const_pointer { return m_underlying.data(); }
 
       /**
-       * @brief Get an iterator to the first element of the basic_dynamic_array.
+       * @brief Returns an iterator to the first element of the basic_dynamic_array.
        *
        * @return An iterator to the first element of the basic_dynamic_array. If the
        * basic_dynamic_array is empty, the iterator will be equal to end().
        */
       constexpr auto begin() noexcept -> iterator { return m_underlying.begin(); }
       /**
-       * @brief Get an const_iterator to the first element of the basic_dynamic_array.
+       * @brief Returns an iterator to the first element of the basic_dynamic_array.
        *
        * @return A const_iterator to the first element of the basic_dynamic_array. If the
        * basic_dynamic_array is empty, the const_iterator will be equal to end().
        */
       constexpr auto begin() const noexcept -> const_iterator { return m_underlying.begin(); }
       /**
-       * @brief Get an const_iterator to the first element of the basic_dynamic_array.
+       * @brief Returns an iterator to the first element of the basic_dynamic_array.
        *
-       * @return A const_iterator to the first element of the basic_dynamic_array. If the
-       * basic_dynamic_array is empty, the const_iterator will be equal to end().
+       * @return iterator to the first element. If the basic_dynamic_array is empty, the
+       * const_iterator will be equal to end().
        */
       constexpr auto cbegin() const noexcept -> const_iterator { return m_underlying.cbegin(); }
+
+      /**
+       * @brief Get an iterator to the element following the last element of the
+       * basic_dynamic_array.
+       *
+       * @return iterator to the element following the last element. Attempting to access it results
+       * in undefined behaviour.
+       */
+      constexpr auto end() noexcept -> iterator { return m_underlying.end(); }
+      /**
+       * @brief Return an iterator to the element following the last element of the
+       * basic_dynamic_array.
+       *
+       * @return iterator to the element following the last element. Attempting to access it results
+       * in undefined behaviour.
+       */
+      constexpr auto end() const noexcept -> const_iterator { return m_underlying.end(); }
+      /**
+       * @brief Returns an it iterator to the element following the last element of the
+       * basic_dynamic_array.
+       *
+       * @return iterator to the element following the last element. Attempting to access it results
+       * in undefined behaviour.
+       */
+      constexpr auto cend() const noexcept -> const_iterator { return m_underlying.cend(); }
+
+      /**
+       * @brief Returns a reverse iterator to the first element of the reversed basic_dynamic_array.
+       * It corresponds to the last element of the non-reversed basic_dynamic_array. If the
+       * basic_dynamic_array is empty, the returned iterator is equal to rend().
+       *
+       * @return Reverse iterator to the first element.
+       */
+      constexpr auto rbegin() noexcept -> reverse_iterator { return m_underlying.rbegin(); }
+      /**
+       * @brief Returns a reverse_iterator to the first element of the reversed basic_dynamic_array.
+       * It corresponds to the last element of the non-reversed basic_dynamic_array. If the
+       * basic_dynamic_array is empty, the returned iterator is equal to rend().
+       *
+       * @return reverse_iterator to the first element.
+       */
+      constexpr auto rbegin() const noexcept -> const_reverse_iterator
+      {
+         return m_underlying.rbegin();
+      }
+      /**
+       * @brief Returns a reverse iterator to the first element of the reversed
+       * basic_dynamic_array. It corresponds to the last element of the non-reversed
+       * basic_dynamic_array. If the basic_dynamic_array is empty, the returned iterator is equal to
+       * rend().
+       *
+       * @return Reverse iterator to the first element.
+       */
+      constexpr auto rcbegin() const noexcept -> const_reverse_iterator
+      {
+         return m_underlying.rcbegin();
+      }
+
+      /**
+       * @brief Returns a reverse iterator to the element following the last element of the reversed
+       * basic_dynamic_array. It corresponds to the element preceding the first element of the
+       * non-reversed basic_dynamic_array. This element acts as a placeholder, attempting to access
+       * it results in UB.
+       *
+       * @return Reverse iterator to the element following the last element.
+       */
+      constexpr auto rend() noexcept -> reverse_iterator { return m_underlying.end(); }
+      /**
+       * @brief Returns a reverse iterator to the element following the last element of the reversed
+       * basic_dynamic_array. It corresponds to the element preceding the first element of the
+       * non-reversed basic_dynamic_array. This element acts as a placeholder, attempting to access
+       * it results in UB.
+       *
+       * @return Reverse iterator to the element following the last element.
+       */
+      constexpr auto rend() const noexcept -> const_reverse_iterator { return m_underlying.rend(); }
+      /**
+       * @brief Returns a reverse iterator to the element following the last element of the reversed
+       * basic_dynamic_array. It corresponds to the element preceding the first element of the
+       * non-reversed basic_dynamic_array. This element acts as a placeholder, attempting to access
+       * it results in UB.
+       *
+       * @return Reverse iterator to the element following the last element.
+       */
+      constexpr auto rcend() const noexcept -> const_reverse_iterator
+      {
+         return m_underlying.rcend();
+      }
+
+      /**
+       * @brief Check if the basic_dynamic_array is empty.
+       *
+       * @return True if the container is empty, false otherwise.
+       */
+      [[nodiscard]] constexpr auto empty() const noexcept -> bool { return m_underlying.empty(); };
+      /**
+       * @brief Check the number of elements stored in the basic_dynamic_array.
+       *
+       * @return The number of elements in the basic_dynamic_array.
+       */
+      [[nodiscard]] constexpr auto size() const noexcept -> size_type
+      {
+         return m_underlying.size();
+      };
+      /**
+       * @brief Check the number of elements that the basic_dynamic_array has currently allocated
+       * space for.
+       *
+       * @return Capacity of the currently allocated storage.
+       */
+      [[nodiscard]] constexpr auto capacity() const noexcept -> size_type
+      {
+         return m_underlying.capacity();
+      };
+      /**
+       * @brief Increase the capacity of the vector to a value that's greater or equal to new_cap.
+       * If new_ap is greater than the current capacity(), new storage is allocated, otherwise the
+       * method does nothing. If reallocated occurs, all current iterators are invalidated.
+       *
+       * @param new_cap New capacity of the vector.
+       *
+       * @throws If the undelying allocator failed to allocate memory.
+       */
+      constexpr void reserve(size_type new_cap) { m_underlying.reserve(new_cap); }
+
+      /**
+       * @brief Erases all elements from the container, After this call, size() returs zero.
+       */
+      constexpr void clear() noexcept { m_underlying.clear(); }
+
+      /**
+       * @brief Inserts an element value at the position before pos in the container.
+       *
+       * @pre pos >= begin()
+       * @pre pos <= end()
+       *
+       * @param[in] pos Iterator before which the content will be inserted. pos may be the end()
+       * iterator.
+       * @param[in] value Element value to insert.
+       *
+       * @return Iterator pointing to the inserted value.
+       */
+      constexpr auto insert(const_iterator pos, const_reference value) -> iterator
+      {
+         return m_underlying.insert(pos, value);
+      }
+
+      /**
+       * @brief Inserts an element value at the position before pos in the container.
+       *
+       * @pre pos >= begin()
+       * @pre pos <= end()
+       *
+       * @param[in] pos Iterator before which the content will be inserted. pos may be the end()
+       * iterator.
+       * @param[in] value Element value to insert.
+       *
+       * @return Iterator pointing to the inserted value.
+       */
+      constexpr auto insert(const_iterator pos, value_type&& value) -> iterator
+      {
+         return m_underlying.insert(pos, std::move(value));
+      }
+      /**
+       * @brief Insert a new element into the container directly before pos. The element is
+       * constructed in-place using the arguments Args... that are forwarded to the constructor.
+       *
+       * @pre pos >= begin()
+       * @pre pos <= end()
+       *
+       * @param[in] pos Iterator before which the content will be inserted. pos may be the end()
+       * @param[in] args Arguments to forward to the constructor of the element.
+       *
+       * @return Iterator pointing to the inserted value.
+       */
+      template <typename... Args>
+      constexpr auto insert(const_iterator pos, Args... args) -> iterator
+      {
+         return m_underlying.insert(pos, std::forward<Args>(args)...);
+      }
+      /**
+       * @brief Inserts count elements from a specified value.
+       *
+       * @pre pos >= begin()
+       * @pre pos <= end()
+       *
+       * @param[in] pos Iterator before which the content will be inserted. pos may be the end()
+       * iterator.
+       * @param[in] count The number of elements to insert.
+       * @param[in] value Element value to insert.
+       *
+       * @return Iterator pointing to the first element inserted.
+       */
+      constexpr auto insert(const_iterator pos, size_type count, const_reference value) -> iterator
+      {
+         return m_underlying.insert(pos, count, value);
+      }
+
+      /**
+       * @brief Inserts elements from a range [first, last) before pos.
+       *
+       * @pre pos >= begin()
+       * @pre pos <= end()
+       *
+       * @param[in] pos Iterator before which the content will be inserted. pos may be the end()
+       * iterator.
+       * @param[in] first The first value to insert
+       * @param[in] last One past the last value to insert.
+       *
+       * @return Iterator pointing to the first element inserted.
+       */
+      template <std::input_iterator InputIt>
+      constexpr auto insert(const_iterator pos, InputIt first, InputIt last) -> iterator
+      {
+         return m_underlying.insert(pos, first, last);
+      }
+
+      /**
+       * @brief Insert elements from an initializer_list before the position pos.
+       *
+       * @pre pos >= begin()
+       * @pre pos <= end()
+       *
+       * @param[in] pos Iterator before which the content will be inserted. pos may be the end()
+       * iterator.
+       * @param[in] init_list Initializer list to insert the values from.
+       *
+       * @return Iterator pointing to the first element inserted.
+       */
+      constexpr auto insert(const_iterator pos, std::initializer_list<value_type> init_list)
+         -> iterator
+      {
+         return m_underlying(pos, init_list);
+      }
+
+      /**
+       * @brief Erases the specified element from the container.
+       *
+       * @pre pos >= begin()
+       * @pre pos <= end()
+       *
+       * @param[in] pos Iterator to the element to remove.
+       */
+      constexpr auto erase(const_iterator pos) -> iterator { return m_underlying.erase(pos); }
+      /**
+       * @brief Erases the specified elements from the container.
+       *
+       * @pre first >= begin()
+       * @pre last <= end()
+       * @pre first >= last
+       *
+       * @param[in] first The first element of the range to copy from.
+       * @param[in] last One past the last element of the range to copy from.
+       *
+       * @return Iterator following the last removed element. If last == end() prior to removal,
+       * then the updated end() iterator is returned. If [first, last) is an empty range, the last
+       * iterator is returned.
+       */
+      constexpr auto erase(const_iterator first, const_iterator last) -> iterator
+      {
+         return m_underlying.erase(first, last);
+      }
+
+      /**
+       * @brief Appends the given element value to the end of the container. The new element is
+       * initialized as a copy of value.
+       *
+       * @param[in] value The value of the element to append.
+       */
+      constexpr void append(const value_type& value) { m_underlying.append(value); }
+      /**
+       * @brief Appends the given element value to the end of the container. Value is moved into the
+       * new element.
+       *
+       * @param[in] value The value of the element to append.
+       */
+      constexpr void append(value_type&& value) { m_underlying.append(std::move(value)); }
+      /**
+       * @brief Appends the given element value to the end of the container. The element is
+       * constructed in-place using the arguments Args... that are forwarded to the constructor.
+       *
+       * @param[in] args Arguments to forward to the constructor of the element.
+       */
+      template <typename... Args>
+      constexpr auto append(Args&&... args) -> reference
+      {
+         return m_underlying.append(std::forward<Args>(args)...);
+      }
+
+      /**
+       * @brief Removes the last element in the container.
+       *
+       * @pre size() != 0
+       */
+      constexpr void pop_back() { return m_underlying.pop_back(); };
+
+      /**
+       * @brief Resizes the container to contain count elements. If the current size is greater than
+       * count, the container is reduced to its first count elements. If the current size is less
+       * than count, default constructed elements are appended.
+       *
+       * @param[in] count New size of the container.
+       */
+      constexpr void resize(size_type count) { m_underlying.resize(count); }
+      /**
+       * @brief Resizes the container to contain count elements. If the current size is greater than
+       * count, the container is reduced to its first count elements. If the current size is less
+       * than count, additional copies of value are appended.
+       *
+       * @param[in] count New size of the container.
+       * @param[in] value The value to initialize new elements with.
+       */
+      constexpr void resize(size_type count, const_reference value)
+      {
+         m_underlying.resize(count, value);
+      }
 
    private:
       underlying_type m_underlying;
@@ -695,9 +1578,9 @@ namespace crl
       using underlying_type = basic_dynamic_array<Any, 0u, std::pmr::polymorphic_allocator<Any>>;
 
    public:
-      using value_type = Any; /**< The type of the elements store in the basic_dynamic_array */
-      using size_type = std::size_t;          /**< unsigned integer type */
-      using difference_type = std::ptrdiff_t; /**< signed integer type */
+      using value_type = Any;
+      using size_type = std::size_t;
+      using difference_type = std::ptrdiff_t;
       using allocator_type = std::pmr::polymorphic_allocator<Any>;
       using reference = value_type&;
       using const_reference = const value_type&;
@@ -709,6 +1592,58 @@ namespace crl
       using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
    public:
+      /**
+       * @brief Default constructor.
+       */
+      constexpr dynamic_array() noexcept(noexcept(underlying_type{})) = default;
+      /**
+       * @brief Construct the container with count copies of elements with value value
+       *
+       * @param[in] count The size of the container.
+       * @param[in] The value to initialize elements from.
+       */
+      constexpr dynamic_array(size_type count, const_reference value) : m_underlying{count, value}
+      {}
+      /**
+       * @brief Construct the container with the contents of the initializer list init.
+       *
+       * @param[in] init Initializer list to initialize the elements of the container with.
+       */
+      constexpr dynamic_array(std::initializer_list<Any> init) : m_underlying{init} {}
+      /**
+       * @brief Construct the container with the contents of the range [first, last)
+       *
+       * @param[in] first The first element of the range to copy from.
+       * @param[in] last One past the last element of the range to copy from.
+       */
+      template <std::input_iterator InputIt>
+      constexpr dynamic_array(InputIt first, InputIt last) : m_underlying{first, last}
+      {}
+
+      /**
+       * @brief Access the object stored at a specific index.
+       *
+       * @param index The position to lookup the object in the array
+       *
+       * @pre index must be less than the size.
+       *
+       * @return A reference to the object stored at index.
+       */
+      constexpr auto lookup(size_type index) -> reference { return m_underlying.lookup(index); }
+      /**
+       * @brief Access the object stored at a specific index.
+       *
+       * @param index The position to lookup the object in the array
+       *
+       * @pre index must be less than the size.
+       *
+       * @return A const reference to the object stored at index.
+       */
+      constexpr auto lookup(size_type index) const -> const_reference
+      {
+         return m_underlying.lookup(index);
+      }
+
       /**
        * @brief Access the data stored by the container.
        *
@@ -725,28 +1660,344 @@ namespace crl
       constexpr auto data() const noexcept -> const_pointer { return m_underlying.data(); }
 
       /**
-       * @brief Get an iterator to the first element of the basic_dynamic_array.
+       * @brief Returns an iterator to the first element of the basic_dynamic_array.
        *
        * @return An iterator to the first element of the basic_dynamic_array. If the
        * basic_dynamic_array is empty, the iterator will be equal to end().
        */
       constexpr auto begin() noexcept -> iterator { return m_underlying.begin(); }
       /**
-       * @brief Get an const_iterator to the first element of the basic_dynamic_array.
+       * @brief Returns an iterator to the first element of the basic_dynamic_array.
        *
        * @return A const_iterator to the first element of the basic_dynamic_array. If the
        * basic_dynamic_array is empty, the const_iterator will be equal to end().
        */
       constexpr auto begin() const noexcept -> const_iterator { return m_underlying.begin(); }
       /**
-       * @brief Get an const_iterator to the first element of the basic_dynamic_array.
+       * @brief Returns an iterator to the first element of the basic_dynamic_array.
        *
-       * @return A const_iterator to the first element of the basic_dynamic_array. If the
-       * basic_dynamic_array is empty, the const_iterator will be equal to end().
+       * @return iterator to the first element. If the basic_dynamic_array is empty, the
+       * const_iterator will be equal to end().
        */
       constexpr auto cbegin() const noexcept -> const_iterator { return m_underlying.cbegin(); }
 
+      /**
+       * @brief Get an iterator to the element following the last element of the
+       * basic_dynamic_array.
+       *
+       * @return iterator to the element following the last element. Attempting to access it results
+       * in undefined behaviour.
+       */
+      constexpr auto end() noexcept -> iterator { return m_underlying.end(); }
+      /**
+       * @brief Return an iterator to the element following the last element of the
+       * basic_dynamic_array.
+       *
+       * @return iterator to the element following the last element. Attempting to access it results
+       * in undefined behaviour.
+       */
+      constexpr auto end() const noexcept -> const_iterator { return m_underlying.end(); }
+      /**
+       * @brief Returns an it iterator to the element following the last element of the
+       * basic_dynamic_array.
+       *
+       * @return iterator to the element following the last element. Attempting to access it results
+       * in undefined behaviour.
+       */
+      constexpr auto cend() const noexcept -> const_iterator { return m_underlying.cend(); }
+
+      /**
+       * @brief Returns a reverse iterator to the first element of the reversed basic_dynamic_array.
+       * It corresponds to the last element of the non-reversed basic_dynamic_array. If the
+       * basic_dynamic_array is empty, the returned iterator is equal to rend().
+       *
+       * @return Reverse iterator to the first element.
+       */
+      constexpr auto rbegin() noexcept -> reverse_iterator { return m_underlying.rbegin(); }
+      /**
+       * @brief Returns a reverse_iterator to the first element of the reversed basic_dynamic_array.
+       * It corresponds to the last element of the non-reversed basic_dynamic_array. If the
+       * basic_dynamic_array is empty, the returned iterator is equal to rend().
+       *
+       * @return reverse_iterator to the first element.
+       */
+      constexpr auto rbegin() const noexcept -> const_reverse_iterator
+      {
+         return m_underlying.rbegin();
+      }
+      /**
+       * @brief Returns a reverse iterator to the first element of the reversed
+       * basic_dynamic_array. It corresponds to the last element of the non-reversed
+       * basic_dynamic_array. If the basic_dynamic_array is empty, the returned iterator is equal to
+       * rend().
+       *
+       * @return Reverse iterator to the first element.
+       */
+      constexpr auto rcbegin() const noexcept -> const_reverse_iterator
+      {
+         return m_underlying.rcbegin();
+      }
+
+      /**
+       * @brief Returns a reverse iterator to the element following the last element of the reversed
+       * basic_dynamic_array. It corresponds to the element preceding the first element of the
+       * non-reversed basic_dynamic_array. This element acts as a placeholder, attempting to access
+       * it results in UB.
+       *
+       * @return Reverse iterator to the element following the last element.
+       */
+      constexpr auto rend() noexcept -> reverse_iterator { return m_underlying.end(); }
+      /**
+       * @brief Returns a reverse iterator to the element following the last element of the reversed
+       * basic_dynamic_array. It corresponds to the element preceding the first element of the
+       * non-reversed basic_dynamic_array. This element acts as a placeholder, attempting to access
+       * it results in UB.
+       *
+       * @return Reverse iterator to the element following the last element.
+       */
+      constexpr auto rend() const noexcept -> const_reverse_iterator { return m_underlying.rend(); }
+      /**
+       * @brief Returns a reverse iterator to the element following the last element of the reversed
+       * basic_dynamic_array. It corresponds to the element preceding the first element of the
+       * non-reversed basic_dynamic_array. This element acts as a placeholder, attempting to access
+       * it results in UB.
+       *
+       * @return Reverse iterator to the element following the last element.
+       */
+      constexpr auto rcend() const noexcept -> const_reverse_iterator
+      {
+         return m_underlying.rcend();
+      }
+
+      /**
+       * @brief Check if the basic_dynamic_array is empty.
+       *
+       * @return True if the container is empty, false otherwise.
+       */
+      [[nodiscard]] constexpr auto empty() const noexcept -> bool { return m_underlying.empty(); };
+      /**
+       * @brief Check the number of elements stored in the basic_dynamic_array.
+       *
+       * @return The number of elements in the basic_dynamic_array.
+       */
+      [[nodiscard]] constexpr auto size() const noexcept -> size_type
+      {
+         return m_underlying.size();
+      };
+      /**
+       * @brief Check the number of elements that the basic_dynamic_array has currently allocated
+       * space for.
+       *
+       * @return Capacity of the currently allocated storage.
+       */
+      [[nodiscard]] constexpr auto capacity() const noexcept -> size_type
+      {
+         return m_underlying.capacity();
+      };
+      /**
+       * @brief Increase the capacity of the vector to a value that's greater or equal to new_cap.
+       * If new_ap is greater than the current capacity(), new storage is allocated, otherwise the
+       * method does nothing. If reallocated occurs, all current iterators are invalidated.
+       *
+       * @param new_cap New capacity of the vector.
+       *
+       * @throws If the undelying allocator failed to allocate memory.
+       */
+      constexpr void reserve(size_type new_cap) { m_underlying.reserve(new_cap); }
+
+      /**
+       * @brief Erases all elements from the container, After this call, size() returs zero.
+       */
+      constexpr void clear() noexcept { m_underlying.clear(); }
+
+      /**
+       * @brief Inserts an element value at the position before pos in the container.
+       *
+       * @pre pos >= begin()
+       * @pre pos <= end()
+       *
+       * @param[in] pos Iterator before which the content will be inserted. pos may be the end()
+       * iterator.
+       * @param[in] value Element value to insert.
+       *
+       * @return Iterator pointing to the inserted value.
+       */
+      constexpr auto insert(const_iterator pos, const_reference value) -> iterator
+      {
+         return m_underlying.insert(pos, value);
+      }
+
+      /**
+       * @brief Inserts an element value at the position before pos in the container.
+       *
+       * @pre pos >= begin()
+       * @pre pos <= end()
+       *
+       * @param[in] pos Iterator before which the content will be inserted. pos may be the end()
+       * iterator.
+       * @param[in] value Element value to insert.
+       *
+       * @return Iterator pointing to the inserted value.
+       */
+      constexpr auto insert(const_iterator pos, value_type&& value) -> iterator
+      {
+         return m_underlying.insert(pos, std::move(value));
+      }
+      /**
+       * @brief Insert a new element into the container directly before pos. The element is
+       * constructed in-place using the arguments Args... that are forwarded to the constructor.
+       *
+       * @pre pos >= begin()
+       * @pre pos <= end()
+       *
+       * @param[in] pos Iterator before which the content will be inserted. pos may be the end()
+       * @param[in] args Arguments to forward to the constructor of the element.
+       *
+       * @return Iterator pointing to the inserted value.
+       */
+      template <typename... Args>
+      constexpr auto insert(const_iterator pos, Args... args) -> iterator
+      {
+         return m_underlying.insert(pos, std::forward<Args>(args)...);
+      }
+      /**
+       * @brief Inserts count elements from a specified value.
+       *
+       * @pre pos >= begin()
+       * @pre pos <= end()
+       *
+       * @param[in] pos Iterator before which the content will be inserted. pos may be the end()
+       * iterator.
+       * @param[in] count The number of elements to insert.
+       * @param[in] value Element value to insert.
+       *
+       * @return Iterator pointing to the first element inserted.
+       */
+      constexpr auto insert(const_iterator pos, size_type count, const_reference value) -> iterator
+      {
+         return m_underlying.insert(pos, count, value);
+      }
+
+      /**
+       * @brief Inserts elements from a range [first, last) before pos.
+       *
+       * @pre pos >= begin()
+       * @pre pos <= end()
+       *
+       * @param[in] pos Iterator before which the content will be inserted. pos may be the end()
+       * iterator.
+       * @param[in] first The first value to insert
+       * @param[in] last One past the last value to insert.
+       *
+       * @return Iterator pointing to the first element inserted.
+       */
+      template <std::input_iterator InputIt>
+      constexpr auto insert(const_iterator pos, InputIt first, InputIt last) -> iterator
+      {
+         return m_underlying.insert(pos, first, last);
+      }
+
+      /**
+       * @brief Insert elements from an initializer_list before the position pos.
+       *
+       * @pre pos >= begin()
+       * @pre pos <= end()
+       *
+       * @param[in] pos Iterator before which the content will be inserted. pos may be the end()
+       * iterator.
+       * @param[in] init_list Initializer list to insert the values from.
+       *
+       * @return Iterator pointing to the first element inserted.
+       */
+      constexpr auto insert(const_iterator pos, std::initializer_list<value_type> init_list)
+         -> iterator
+      {
+         return m_underlying(pos, init_list);
+      }
+
+      /**
+       * @brief Erases the specified element from the container.
+       *
+       * @pre pos >= begin()
+       * @pre pos <= end()
+       *
+       * @param[in] pos Iterator to the element to remove.
+       */
+      constexpr auto erase(const_iterator pos) -> iterator { return m_underlying.erase(pos); }
+      /**
+       * @brief Erases the specified elements from the container.
+       *
+       * @pre first >= begin()
+       * @pre last <= end()
+       * @pre first >= last
+       *
+       * @param[in] first The first element of the range to copy from.
+       * @param[in] last One past the last element of the range to copy from.
+       *
+       * @return Iterator following the last removed element. If last == end() prior to removal,
+       * then the updated end() iterator is returned. If [first, last) is an empty range, the last
+       * iterator is returned.
+       */
+      constexpr auto erase(const_iterator first, const_iterator last) -> iterator
+      {
+         return m_underlying.erase(first, last);
+      }
+
+      /**
+       * @brief Appends the given element value to the end of the container. The new element is
+       * initialized as a copy of value.
+       *
+       * @param[in] value The value of the element to append.
+       */
+      constexpr void append(const value_type& value) { m_underlying.append(value); }
+      /**
+       * @brief Appends the given element value to the end of the container. Value is moved into the
+       * new element.
+       *
+       * @param[in] value The value of the element to append.
+       */
+      constexpr void append(value_type&& value) { m_underlying.append(std::move(value)); }
+      /**
+       * @brief Appends the given element value to the end of the container. The element is
+       * constructed in-place using the arguments Args... that are forwarded to the constructor.
+       *
+       * @param[in] args Arguments to forward to the constructor of the element.
+       */
+      template <typename... Args>
+      constexpr auto append(Args&&... args) -> reference
+      {
+         return m_underlying.append(std::forward<Args>(args)...);
+      }
+
+      /**
+       * @brief Removes the last element in the container.
+       *
+       * @pre size() != 0
+       */
+      constexpr void pop_back() { return m_underlying.pop_back(); };
+
+      /**
+       * @brief Resizes the container to contain count elements. If the current size is greater than
+       * count, the container is reduced to its first count elements. If the current size is less
+       * than count, default constructed elements are appended.
+       *
+       * @param[in] count New size of the container.
+       */
+      constexpr void resize(size_type count) { m_underlying.resize(count); }
+      /**
+       * @brief Resizes the container to contain count elements. If the current size is greater than
+       * count, the container is reduced to its first count elements. If the current size is less
+       * than count, additional copies of value are appended.
+       *
+       * @param[in] count New size of the container.
+       * @param[in] value The value to initialize new elements with.
+       */
+      constexpr void resize(size_type count, const_reference value)
+      {
+         m_underlying.resize(count, value);
+      }
+
    private:
-      basic_dynamic_array<Any, 0u, std::pmr::polymorphic_allocator<Any>> m_underlying;
+      underlying_type m_underlying;
    };
 } // namespace crl

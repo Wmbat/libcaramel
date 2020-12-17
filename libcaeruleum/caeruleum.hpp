@@ -1,6 +1,5 @@
 /**
  * @mainpage libcaeruleum
- * This is the main page for the project.
  */
 
 #pragma once
