@@ -1,4 +1,4 @@
-project = libcaeruleum
+project = libcaramel
 
 using version
 using config

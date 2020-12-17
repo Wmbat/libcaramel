@@ -8,21 +8,21 @@
 // used before their inline definition. The workaround is to reorder code. In
 // the end it's all trial and error.
 
-#if defined(LIBCAERULEUM_STATIC)         // Using static.
-#  define LIBCAERULEUM_SYMEXPORT
-#elif defined(LIBCAERULEUM_STATIC_BUILD) // Building static.
-#  define LIBCAERULEUM_SYMEXPORT
-#elif defined(LIBCAERULEUM_SHARED)       // Using shared.
+#if defined(LIBCARAMEL_STATIC)         // Using static.
+#  define LIBCARAMEL_SYMEXPORT
+#elif defined(LIBCARAMEL_STATIC_BUILD) // Building static.
+#  define LIBCARAMEL_SYMEXPORT
+#elif defined(LIBCARAMEL_SHARED)       // Using shared.
 #  ifdef _WIN32
-#    define LIBCAERULEUM_SYMEXPORT __declspec(dllimport)
+#    define LIBCARAMEL_SYMEXPORT __declspec(dllimport)
 #  else
-#    define LIBCAERULEUM_SYMEXPORT
+#    define LIBCARAMEL_SYMEXPORT
 #  endif
-#elif defined(LIBCAERULEUM_SHARED_BUILD) // Building shared.
+#elif defined(LIBCARAMEL_SHARED_BUILD) // Building shared.
 #  ifdef _WIN32
-#    define LIBCAERULEUM_SYMEXPORT __declspec(dllexport)
+#    define LIBCARAMEL_SYMEXPORT __declspec(dllexport)
 #  else
-#    define LIBCAERULEUM_SYMEXPORT
+#    define LIBCARAMEL_SYMEXPORT
 #  endif
 #else
 // If none of the above macros are defined, then we assume we are being used
@@ -34,6 +34,6 @@
 // then you will probably want to replace the fallback with the (commented
 // out) error since it won't work for the shared case.
 //
-#  define LIBCAERULEUM_SYMEXPORT         // Using static or shared.
-//#  error define LIBCAERULEUM_STATIC or LIBCAERULEUM_SHARED preprocessor macro to signal libcaeruleum library type being linked
+#  define LIBCARAMEL_SYMEXPORT         // Using static or shared.
+//#  error define LIBCARAMEL_STATIC or LIBCARAMEL_SHARED preprocessor macro to signal libcaeruleum library type being linked
 #endif

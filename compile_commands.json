@@ -31,31 +31,6 @@
   "directory": "/home/wmbat/projects/libcaeruleum",
   "arguments": [
    "clang++",
-   "-I/home/wmbat/projects/debug/libcaeruleum/clang/monads-0.1.0",
-   "-I/home/wmbat/projects/debug/libcaeruleum/clang/monads-0.1.0",
-   "-DMONADS_SHARED",
-   "-I/home/wmbat/projects/debug/libcaeruleum/clang/doctest-2.4.0/upstream",
-   "-O0",
-   "-g",
-   "-Wall",
-   "-Wextra",
-   "-Werror",
-   "-fno-omit-frame-pointer",
-   "-fsanitize=address",
-   "-std=c++20",
-   "-o",
-   "../debug/libcaeruleum/clang/monads-0.1.0/tests/monads/main.o",
-   "-c",
-   "-x",
-   "c++",
-   "/home/wmbat/projects/debug/libcaeruleum/clang/monads-0.1.0/tests/monads/main.cpp"
-  ],
-  "file": "/home/wmbat/projects/debug/libcaeruleum/clang/monads-0.1.0/tests/monads/main.cpp"
- },
- {
-  "directory": "/home/wmbat/projects/libcaeruleum",
-  "arguments": [
-   "clang++",
    "-I/home/wmbat/projects/debug/libcaeruleum/clang/doctest-2.4.0/upstream",
    "-O0",
    "-g",
@@ -95,5 +70,34 @@
    "/home/wmbat/projects/debug/libcaeruleum/clang/doctest-2.4.0/tests/tutorial.cpp"
   ],
   "file": "/home/wmbat/projects/debug/libcaeruleum/clang/doctest-2.4.0/tests/tutorial.cpp"
+ },
+ {
+  "directory": "/home/wmbat/projects/libcaramel",
+  "arguments": [
+   "g++",
+   "-I/home/wmbat/projects/debug/libcaramel/gcc-asan/monads-0.1.1-a.5",
+   "-I/home/wmbat/projects/debug/libcaramel/gcc-asan/monads-0.1.1-a.5",
+   "-DMONADS_SHARED",
+   "-I/home/wmbat/projects/debug/libcaramel/gcc-asan/libcaramel",
+   "-I/home/wmbat/projects/libcaramel",
+   "-DLIBCAERULEUM_SHARED",
+   "-I/home/wmbat/projects/debug/libcaramel/gcc-asan/doctest-2.4.0/upstream",
+   "-O0",
+   "-g",
+   "-Wall",
+   "-Wextra",
+   "-Werror",
+   "-Wconversion",
+   "-fno-omit-frame-pointer",
+   "-fsanitize=address",
+   "-std=c++2a",
+   "-o",
+   "../debug/libcaramel/gcc-asan/libcaramel/tests/basics/driver.o",
+   "-c",
+   "-x",
+   "c++",
+   "/home/wmbat/projects/libcaramel/tests/basics/driver.cpp"
+  ],
+  "file": "/home/wmbat/projects/libcaramel/tests/basics/driver.cpp"
  }
 ]

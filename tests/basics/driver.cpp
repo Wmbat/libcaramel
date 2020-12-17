@@ -1,9 +1,9 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
 
-#include <libcaeruleum/caeruleum.hpp>
-#include <libcaeruleum/containers/dynamic_array.hpp>
-#include <libcaeruleum/version.hpp>
+#include <libcaramel/caramel.hpp>
+#include <libcaramel/containers/dynamic_array.hpp>
+#include <libcaramel/version.hpp>
 
 TEST_SUITE("dynamic_array test suite")
 {

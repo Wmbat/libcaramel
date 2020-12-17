@@ -5,4 +5,4 @@
 
 #pragma once
 
-#include <libcaeruleum/containers/dynamic_array.hpp>
+#include <libcaramel/containers/dynamic_array.hpp>

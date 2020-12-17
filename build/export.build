@@ -1,6 +1,6 @@
 $out_root/
 {
-  include libcaeruleum/
+  include libcaramel/
 }
 
-export $out_root/libcaeruleum/$import.target
+export $out_root/libcaramel/$import.target
