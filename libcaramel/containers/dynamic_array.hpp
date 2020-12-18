@@ -467,7 +467,13 @@ namespace crl
        *
        * @throws If the undelying allocator failed to allocate memory.
        */
-      constexpr void reserve(size_type new_cap);
+      constexpr void reserve(size_type new_cap)
+      {
+         if (new_cap > capacity())
+         {
+            grow(new_cap);
+         }
+      }
 
       /**
        * @brief Erases all elements from the container, After this call, size() returs zero.
