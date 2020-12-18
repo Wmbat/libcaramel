@@ -65,8 +65,8 @@ namespace crl
       using const_reference = const value_type&;
       using pointer = typename std::allocator_traits<allocator_type>::pointer;
       using const_pointer = typename std::allocator_traits<allocator_type>::const_pointer;
-      using iterator = random_access_iterator<value_type, false>;
-      using const_iterator = random_access_iterator<value_type, true>;
+      using iterator = pointer;
+      using const_iterator = const_pointer;
       using reverse_iterator = std::reverse_iterator<iterator>;
       using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
@@ -254,6 +254,25 @@ namespace crl
 
          return *this;
       }
+
+      /**
+       * @brief Replaces the contents with those identified by initializer list init_list
+       *
+       * @param init_list Initializer list to use as data source.
+       */
+      constexpr auto operator=(std::initializer_list<Any> init_list) -> basic_dynamic_array&
+      {
+         assign(init_list);
+
+         return *this;
+      }
+
+      /**
+       * @brief Returns the allocator associated with the container.
+       *
+       * @return The associated allocator.
+       */
+      constexpr auto allocator() const noexcept -> allocator_type { return m_allocator; }
 
       /**
        * @brief Access the object stored at a specific index.
@@ -1226,6 +1245,18 @@ namespace crl
       {}
 
       /**
+       * @brief Replaces the contents with those identified by initializer list init_list
+       *
+       * @param init_list Initializer list to use as data source.
+       */
+      constexpr auto operator=(std::initializer_list<Any> init_list) -> small_dynamic_array&
+      {
+         m_underlying = init_list;
+
+         return *this;
+      }
+
+      /**
        * @brief Access the object stored at a specific index.
        *
        * @param index The position to lookup the object in the array
@@ -1678,6 +1709,18 @@ namespace crl
       {}
 
       /**
+       * @brief Replaces the contents with those identified by initializer list init_list
+       *
+       * @param init_list Initializer list to use as data source.
+       */
+      constexpr auto operator=(std::initializer_list<Any> init_list) -> dynamic_array&
+      {
+         m_underlying = init_list;
+
+         return *this;
+      }
+
+      /**
        * @brief Access the object stored at a specific index.
        *
        * @param index The position to lookup the object in the array
@@ -2072,3 +2115,108 @@ namespace crl
    }
 
 } // namespace crl
+
+namespace std // NOLINT
+{
+   /**
+    * @brief Erases all elements that compare equal to value from the container.
+    *
+    * @param[in] arr Container from which to erase.
+    * @param[in] value Value to be removed.
+    *
+    * @return The number of erased elements.
+    */
+   template <typename Any, std::size_t Size, typename Allocator, typename Value>
+   constexpr auto erase(crl::basic_dynamic_array<Any, Size, Allocator>& arr, const Value& value)
+   {
+      const auto it = std::remove(std::begin(arr), std::end(arr), value);
+      const auto r = std::distance(it, std::end(arr));
+      arr.erase(it, std::end(arr));
+      return r;
+   }
+
+   /**
+    * @brief Erases all elements that satisfy the predicate pred from the container.
+    *
+    * @param[in] arr Container from which to erase.
+    * @param[in] pred Unary predicate which returns `true` if the element should be erased.
+    *
+    * @return The number of erased elements.
+    */
+   template <typename Any, std::size_t Size, typename Allocator, typename Pred>
+   constexpr auto erase_if(crl::basic_dynamic_array<Any, Size, Allocator>& arr, Pred pred)
+   {
+      const auto it = std::remove_if(std::begin(arr), std::end(arr), pred);
+      const auto r = std::distance(it, std::end(arr));
+      arr.erase(it, std::end(arr));
+      return r;
+   }
+
+   /**
+    * @brief Erases all elements that compare equal to value from the container.
+    *
+    * @param[in] arr Container from which to erase.
+    * @param[in] value Value to be removed.
+    *
+    * @return The number of erased elements.
+    */
+   template <typename Any, std::size_t Size, typename Value>
+   constexpr auto erase(crl::small_dynamic_array<Any, Size>& arr, const Value& value)
+   {
+      const auto it = std::remove(std::begin(arr), std::end(arr), value);
+      const auto r = std::distance(it, std::end(arr));
+      arr.erase(it, std::end(arr));
+      return r;
+   }
+
+   /**
+    * @brief Erases all elements that satisfy the predicate pred from the container.
+    *
+    * @param[in] arr Container from which to erase.
+    * @param[in] pred Unary predicate which returns `true` if the element should be erased.
+    *
+    * @return The number of erased elements.
+    */
+   template <typename Any, std::size_t Size, typename Pred>
+   constexpr auto erase_if(crl::small_dynamic_array<Any, Size>& arr, Pred pred)
+   {
+      const auto it = std::remove_if(std::begin(arr), std::end(arr), pred);
+      const auto r = std::distance(it, std::end(arr));
+      arr.erase(it, std::end(arr));
+      return r;
+   }
+
+   /**
+    * @brief Erases all elements that compare equal to value from the container.
+    *
+    * @param[in] arr Container from which to erase.
+    * @param[in] value Value to be removed.
+    *
+    * @return The number of erased elements.
+    */
+   template <typename Any, typename Value>
+   constexpr auto erase(crl::dynamic_array<Any>& arr, const Value& value)
+   {
+      const auto it = std::remove(std::begin(arr), std::end(arr), value);
+      const auto r = std::distance(it, std::end(arr));
+      arr.erase(it, std::end(arr));
+      return r;
+   }
+
+   /**
+    * @brief Erases all elements that satisfy the predicate pred from the container.
+    *
+    * @param[in] arr Container from which to erase.
+    * @param[in] pred Unary predicate which returns `true` if the element should be erased.
+    *
+    * @return The number of erased elements.
+    */
+   template <typename Any, typename Pred>
+   constexpr auto erase_if(crl::dynamic_array<Any>& arr, Pred pred)
+   {
+      const auto it = std::remove_if(std::begin(arr), std::end(arr), pred);
+      const auto r = std::distance(it, std::end(arr));
+      arr.erase(it, std::end(arr));
+      return r;
+   }
+} // namespace std
