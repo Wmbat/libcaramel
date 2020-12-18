@@ -11,7 +11,11 @@ TEST_SUITE("dynamic_array test suite")
 
    TEST_CASE("index based lookup")
    {
-      SUBCASE("in range index") { basic_dynamic_array<std::string, 0u> my_str_array{}; }
+      SUBCASE("in range index")
+      {
+         basic_dynamic_array<std::string, 0u> my_str_array{};
+         crl::erase(my_str_array, std::string{"Hello"});
+      }
 
       SUBCASE("out of range index") { REQUIRE(false); }
    }

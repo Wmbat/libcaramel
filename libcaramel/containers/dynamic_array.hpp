@@ -39,8 +39,8 @@ namespace crl
       using const_reference = const value_type&;
       using pointer = typename std::allocator_traits<allocator_type>::pointer;
       using const_pointer = typename std::allocator_traits<allocator_type>::const_pointer;
-      using iterator = random_access_iterator<value_type, false>;
-      using const_iterator = random_access_iterator<value_type, true>;
+      using iterator = pointer;
+      using const_iterator = const_pointer;
       using reverse_iterator = std::reverse_iterator<iterator>;
       using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
@@ -228,6 +228,13 @@ namespace crl
 
          return *this;
       }
+
+      /**
+       * @brief Returns the allocator associated with the container.
+       *
+       * @return The associated allocator.
+       */
+      constexpr auto allocator() const noexcept -> allocator_type { return m_allocator; }
 
       /**
        * @brief Access the object stored at a specific index.
@@ -2001,3 +2008,60 @@ namespace crl
       underlying_type m_underlying;
    };
 } // namespace crl
+
+namespace std // NOLINT
+{
+   template <typename Any, std::size_t Size, typename Allocator, typename Value>
+   constexpr auto erase(crl::basic_dynamic_array<Any, Size, Allocator>& arr, const Value& value)
+   {
+      const auto it = std::remove(std::begin(arr), std::end(arr), value);
+      const auto r = std::distance(it, std::end(arr));
+      arr.erase(it, std::end(arr));
+      return r;
+   }
+
+   template <typename Any, std::size_t Size, typename Allocator, typename Pred>
+   constexpr auto erase_if(crl::basic_dynamic_array<Any, Size, Allocator>& arr, Pred pred)
+   {
+      const auto it = std::remove_if(std::begin(arr), std::end(arr), pred);
+      const auto r = std::distance(it, std::end(arr));
+      arr.erase(it, std::end(arr));
+      return r;
+   }
+
+   template <typename Any, std::size_t Size, typename Value>
+   constexpr auto erase(crl::small_dynamic_array<Any, Size>& arr, const Value& value)
+   {
+      const auto it = std::remove(std::begin(arr), std::end(arr), value);
+      const auto r = std::distance(it, std::end(arr));
+      arr.erase(it, std::end(arr));
+      return r;
+   }
+
+   template <typename Any, std::size_t Size, typename Pred>
+   constexpr auto erase_if(crl::small_dynamic_array<Any, Size>& arr, Pred pred)
+   {
+      const auto it = std::remove_if(std::begin(arr), std::end(arr), pred);
+      const auto r = std::distance(it, std::end(arr));
+      arr.erase(it, std::end(arr));
+      return r;
+   }
+
+   template <typename Any, typename Value>
+   constexpr auto erase(crl::dynamic_array<Any>& arr, const Value& value)
+   {
+      const auto it = std::remove(std::begin(arr), std::end(arr), value);
+      const auto r = std::distance(it, std::end(arr));
+      arr.erase(it, std::end(arr));
+      return r;
+   }
+
+   template <typename Any, typename Pred>
+   constexpr auto erase_if(crl::dynamic_array<Any>& arr, Pred pred)
+   {
+      const auto it = std::remove_if(std::begin(arr), std::end(arr), pred);
+      const auto r = std::distance(it, std::end(arr));
+      arr.erase(it, std::end(arr));
+      return r;
+   }
+} // namespace std
