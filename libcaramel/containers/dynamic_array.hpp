@@ -245,8 +245,8 @@ namespace crl
        * @param[in] rhs other container to use as a data source.
        */
       constexpr auto operator=(basic_dynamic_array&& rhs) noexcept(
-         allocator_type::propagate_on_container_move_assignment::value ||
-         allocator_type::is_always_equal::value) -> basic_dynamic_array&
+         allocator_traits::propagate_on_container_move_assignment::value ||
+         allocator_traits::is_always_equal::value) -> basic_dynamic_array&
       {
          move_assign(rhs,
                      std::integral_constant<
@@ -1049,8 +1049,7 @@ namespace crl
          }
       }
 
-      constexpr void move_assign_alloc(const basic_dynamic_array& other) noexcept(
-         std::is_nothrow_assignable_v<allocator_type>)
+      constexpr void move_assign_alloc(const basic_dynamic_array& other)
       {
          if constexpr (allocator_traits::propagate_on_container_move_assignment::value)
          {
