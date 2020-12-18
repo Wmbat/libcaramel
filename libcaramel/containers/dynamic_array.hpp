@@ -853,14 +853,34 @@ namespace crl
        *
        * @param[in] value The value of the element to append.
        */
-      constexpr void append(const value_type& value) { append(value); }
+      constexpr void append(const value_type& value)
+      {
+         if (size() >= capacity())
+         {
+            grow();
+         }
+
+         construct(mp_begin + size(), value);
+
+         ++m_size;
+      }
       /**
        * @brief Appends the given element value to the end of the container. Value is moved into the
        * new element.
        *
        * @param[in] value The value of the element to append.
        */
-      constexpr void append(value_type&& value) { append(std::move(value)); }
+      constexpr void append(value_type&& value)
+      {
+         if (size() >= capacity())
+         {
+            grow();
+         }
+
+         construct(mp_begin + size(), std::move(value));
+
+         ++m_size;
+      }
       /**
        * @brief Appends the given element value to the end of the container. The element is
        * constructed in-place using the arguments Args... that are forwarded to the constructor.
@@ -875,7 +895,7 @@ namespace crl
             grow();
          }
 
-         construct(mp_begin + size(), std::forward<decltype(args)>(args)...);
+         construct(mp_begin + size(), std::forward<Args>(args)...);
 
          ++m_size;
 
