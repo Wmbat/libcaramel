@@ -1089,7 +1089,7 @@ namespace crl
 
             m_size = other.size();
             m_capacity = other.capacity();
-            mp_begin = other.m_pbegin;
+            mp_begin = other.mp_begin;
          }
          else
          {
@@ -1209,8 +1209,8 @@ namespace crl
       using const_reference = const value_type&;
       using pointer = typename std::allocator_traits<allocator_type>::pointer;
       using const_pointer = typename std::allocator_traits<allocator_type>::const_pointer;
-      using iterator = random_access_iterator<value_type, false>;
-      using const_iterator = random_access_iterator<value_type, true>;
+      using iterator = pointer;
+      using const_iterator = const_pointer;
       using reverse_iterator = std::reverse_iterator<iterator>;
       using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
@@ -1674,8 +1674,8 @@ namespace crl
       using const_reference = const value_type&;
       using pointer = typename std::allocator_traits<allocator_type>::pointer;
       using const_pointer = typename std::allocator_traits<allocator_type>::const_pointer;
-      using iterator = random_access_iterator<value_type, false>;
-      using const_iterator = random_access_iterator<value_type, true>;
+      using iterator = pointer;
+      using const_iterator = const_pointer;
       using reverse_iterator = std::reverse_iterator<iterator>;
       using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
