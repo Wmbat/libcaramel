@@ -13,6 +13,32 @@
 
 namespace crl
 {
+   namespace detail
+   {
+      template <typename First, typename Second>
+      auto synth_three_way(const First& lhs, const Second& rhs)
+      {
+         if constexpr (std::three_way_comparable_with<First, Second>)
+         {
+            return lhs <=> rhs;
+         }
+         else
+         {
+            if (lhs == rhs)
+            {
+               return std::strong_ordering::equal;
+            }
+
+            if (lhs < rhs)
+            {
+               return std::strong_ordering::less;
+            }
+
+            return std::strong_ordering::greater;
+         }
+      }
+   } // namespace detail
+
    /**
     * @author wmbat wmbat@protonmail.com
     * @date Sunday, 13th of december 2020
@@ -1125,6 +1151,22 @@ namespace crl
       allocator_type m_allocator;
    };
 
+   template <std::equality_comparable Any, std::size_t SizeOne, std::size_t SizeTwo,
+             typename allocator>
+   constexpr auto operator==(const basic_dynamic_array<Any, SizeOne, allocator>& lhs,
+                             const basic_dynamic_array<Any, SizeTwo, allocator>& rhs) -> bool
+   {
+      return std::equal(std::begin(lhs), std::end(lhs), std::begin(rhs), std::end(rhs));
+   }
+
+   template <typename Any, std::size_t SizeOne, std::size_t SizeTwo, typename allocator>
+   constexpr auto operator<=>(const basic_dynamic_array<Any, SizeOne, allocator>& lhs,
+                              const basic_dynamic_array<Any, SizeTwo, allocator>& rhs)
+   {
+      return std::lexicographical_compare_three_way(std::begin(lhs), std::end(lhs), std::begin(rhs),
+                                                    std::end(rhs), detail::synth_three_way);
+   }
+
    /**
     * @author wmbat wmbat@protonmail.com
     * @date Sunday, 13th of december 2020
@@ -1564,6 +1606,21 @@ namespace crl
       underlying_type m_underlying;
    };
 
+   template <std::equality_comparable Any, std::size_t SizeOne, std::size_t SizeTwo>
+   constexpr auto operator==(const small_dynamic_array<Any, SizeOne>& lhs,
+                             const small_dynamic_array<Any, SizeTwo>& rhs) -> bool
+   {
+      return std::equal(std::begin(lhs), std::end(lhs), std::begin(rhs), std::end(rhs));
+   }
+
+   template <typename Any, std::size_t SizeOne, std::size_t SizeTwo>
+   constexpr auto operator<=>(const small_dynamic_array<Any, SizeOne>& lhs,
+                              const small_dynamic_array<Any, SizeTwo>& rhs)
+   {
+      return std::lexicographical_compare_three_way(std::begin(lhs), std::end(lhs), std::begin(rhs),
+                                                    std::end(rhs), detail::synth_three_way);
+   }
+
    /**
     * @author wmbat wmbat@protonmail.com
     * @date Sunday, 13th of december 2020
@@ -2000,4 +2057,18 @@ namespace crl
    private:
       underlying_type m_underlying;
    };
+
+   template <std::equality_comparable Any>
+   constexpr auto operator==(const dynamic_array<Any>& lhs, const dynamic_array<Any>& rhs) -> bool
+   {
+      return std::equal(std::begin(lhs), std::end(lhs), std::begin(rhs), std::end(rhs));
+   }
+
+   template <typename Any>
+   constexpr auto operator<=>(const dynamic_array<Any>& lhs, const dynamic_array<Any>& rhs)
+   {
+      return std::lexicographical_compare_three_way(std::begin(lhs), std::end(lhs), std::begin(rhs),
+                                                    std::end(rhs), detail::synth_three_way);
+   }
+
 } // namespace crl
