@@ -2118,6 +2118,14 @@ namespace crl
 
 namespace std // NOLINT
 {
+   /**
+    * @brief Erases all elements that compare equal to value from the container.
+    *
+    * @param[in] arr Container from which to erase.
+    * @param[in] value Value to be removed.
+    *
+    * @return The number of erased elements.
+    */
    template <typename Any, std::size_t Size, typename Allocator, typename Value>
    constexpr auto erase(crl::basic_dynamic_array<Any, Size, Allocator>& arr, const Value& value)
    {
@@ -2127,6 +2135,14 @@ namespace std // NOLINT
       return r;
    }
 
+   /**
+    * @brief Erases all elements that satisfy the predicate pred from the container.
+    *
+    * @param[in] arr Container from which to erase.
+    * @param[in] pred Unary predicate which returns `true` if the element should be erased.
+    *
+    * @return The number of erased elements.
+    */
    template <typename Any, std::size_t Size, typename Allocator, typename Pred>
    constexpr auto erase_if(crl::basic_dynamic_array<Any, Size, Allocator>& arr, Pred pred)
    {
@@ -2136,6 +2152,14 @@ namespace std // NOLINT
       return r;
    }
 
+   /**
+    * @brief Erases all elements that compare equal to value from the container.
+    *
+    * @param[in] arr Container from which to erase.
+    * @param[in] value Value to be removed.
+    *
+    * @return The number of erased elements.
+    */
    template <typename Any, std::size_t Size, typename Value>
    constexpr auto erase(crl::small_dynamic_array<Any, Size>& arr, const Value& value)
    {
@@ -2145,6 +2169,14 @@ namespace std // NOLINT
       return r;
    }
 
+   /**
+    * @brief Erases all elements that satisfy the predicate pred from the container.
+    *
+    * @param[in] arr Container from which to erase.
+    * @param[in] pred Unary predicate which returns `true` if the element should be erased.
+    *
+    * @return The number of erased elements.
+    */
    template <typename Any, std::size_t Size, typename Pred>
    constexpr auto erase_if(crl::small_dynamic_array<Any, Size>& arr, Pred pred)
    {
@@ -2154,6 +2186,14 @@ namespace std // NOLINT
       return r;
    }
 
+   /**
+    * @brief Erases all elements that compare equal to value from the container.
+    *
+    * @param[in] arr Container from which to erase.
+    * @param[in] value Value to be removed.
+    *
+    * @return The number of erased elements.
+    */
    template <typename Any, typename Value>
    constexpr auto erase(crl::dynamic_array<Any>& arr, const Value& value)
    {
@@ -2163,6 +2203,14 @@ namespace std // NOLINT
       return r;
    }
 
+   /**
+    * @brief Erases all elements that satisfy the predicate pred from the container.
+    *
+    * @param[in] arr Container from which to erase.
+    * @param[in] pred Unary predicate which returns `true` if the element should be erased.
+    *
+    * @return The number of erased elements.
+    */
    template <typename Any, typename Pred>
    constexpr auto erase_if(crl::dynamic_array<Any>& arr, Pred pred)
    {
