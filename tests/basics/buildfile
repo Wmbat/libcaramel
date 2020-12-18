@@ -1,5 +1,4 @@
-import libs = monads%lib{monads}
-import libs += libcaramel%lib{caramel}
+import libs = libcaramel%lib{caramel}
 import libs += doctest%lib{doctest}
 
 exe{driver}: {hxx ixx txx cxx}{**} $libs testscript{**}
