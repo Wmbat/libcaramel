@@ -503,7 +503,7 @@ namespace crl
 
          if (pos == cend())
          {
-            push_back(value);
+            append(value);
 
             return end() - 1;
          }
@@ -556,7 +556,7 @@ namespace crl
 
          if (pos == cend())
          {
-            push_back(std::move(value));
+            append(std::move(value));
 
             return end() - 1;
          }
@@ -609,7 +609,7 @@ namespace crl
 
          if (pos == cend())
          {
-            emplace_back(std::forward<Args>(args)...);
+            append(std::forward<Args>(args)...);
 
             return end() - 1;
          }
