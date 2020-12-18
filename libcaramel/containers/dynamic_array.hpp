@@ -256,6 +256,18 @@ namespace crl
       }
 
       /**
+       * @brief Replaces the contents with those identified by initializer list init_list
+       *
+       * @param init_list Initializer list to use as data source.
+       */
+      constexpr auto operator=(std::initializer_list<Any> init_list) -> basic_dynamic_array&
+      {
+         assign(init_list);
+
+         return *this;
+      }
+
+      /**
        * @brief Returns the allocator associated with the container.
        *
        * @return The associated allocator.
@@ -1233,6 +1245,18 @@ namespace crl
       {}
 
       /**
+       * @brief Replaces the contents with those identified by initializer list init_list
+       *
+       * @param init_list Initializer list to use as data source.
+       */
+      constexpr auto operator=(std::initializer_list<Any> init_list) -> small_dynamic_array&
+      {
+         m_underlying = init_list;
+
+         return *this;
+      }
+
+      /**
        * @brief Access the object stored at a specific index.
        *
        * @param index The position to lookup the object in the array
@@ -1683,6 +1707,18 @@ namespace crl
       template <std::input_iterator InputIt>
       constexpr dynamic_array(InputIt first, InputIt last) : m_underlying{first, last}
       {}
+
+      /**
+       * @brief Replaces the contents with those identified by initializer list init_list
+       *
+       * @param init_list Initializer list to use as data source.
+       */
+      constexpr auto operator=(std::initializer_list<Any> init_list) -> dynamic_array&
+      {
+         m_underlying = init_list;
+
+         return *this;
+      }
 
       /**
        * @brief Access the object stored at a specific index.
