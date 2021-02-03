@@ -11,7 +11,12 @@ TEST_SUITE("dynamic_array test suite")
 
    TEST_CASE("index based lookup")
    {
-      SUBCASE("in range index") {}
+      SUBCASE("in range index")
+      {
+         crl::dynamic_array<int> test;
+         test.append(10);
+         [[maybe_unused]] const auto t = *test.begin();
+      }
 
       SUBCASE("out of range index") {}
    }

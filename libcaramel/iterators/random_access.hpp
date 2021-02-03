@@ -46,13 +46,13 @@ namespace crl
        *
        * @return A reference to the undelying value
        */
-      constexpr auto operator*() const noexcept -> value_type& { return *mp_value; }
+      constexpr auto operator*() const noexcept -> reference { return *mp_value; }
       /**
        * @brief Directly access the value the iterator points to.
        *
        * @return A pointer to the underlying value.
        */
-      constexpr auto operator->() const noexcept -> value_type* { return mp_value; }
+      constexpr auto operator->() const noexcept -> pointer { return mp_value; }
 
       /**
        * @brief Increment the iterator by one.
