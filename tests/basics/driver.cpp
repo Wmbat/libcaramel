@@ -13,7 +13,9 @@ TEST_SUITE("dynamic_array test suite")
    {
       SUBCASE("in range index")
       {
-         crl::dynamic_array<int> test;
+         crl::basic_dynamic_array te{10, 10};
+         crl::basic_dynamic_array test{te.begin(), te.end()};
+
          test.append(10);
          [[maybe_unused]] const auto t = *test.begin();
       }

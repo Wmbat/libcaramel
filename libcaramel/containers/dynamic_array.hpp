@@ -1146,7 +1146,7 @@ namespace crl
       {
          clear();
 
-         const size_type new_count = std::distance(first, last);
+         const auto new_count = static_cast<size_type>(std::distance(first, last));
          if (new_count > capacity())
          {
             grow(new_count);
@@ -1210,6 +1210,15 @@ namespace crl
       return std::lexicographical_compare_three_way(std::begin(lhs), std::end(lhs), std::begin(rhs),
                                                     std::end(rhs), detail::synth_three_way);
    }
+
+   template <typename Iter, std::size_t Size = 0,
+             typename Allocator =
+                std::pmr::polymorphic_allocator<typename std::iterator_traits<Iter>::value_type>>
+   basic_dynamic_array(Iter, Iter)
+      -> basic_dynamic_array<typename std::iterator_traits<Iter>::value_type, Size, Allocator>;
+
+   template <typename Any, typename... U, typename Allocator = std::pmr::polymorphic_allocator<Any>>
+   basic_dynamic_array(Any, U...) -> basic_dynamic_array<Any, 1 + sizeof...(U), Allocator>;
 
    /**
     * @author wmbat wmbat@protonmail.com
@@ -1676,6 +1685,13 @@ namespace crl
       return std::lexicographical_compare_three_way(std::begin(lhs), std::end(lhs), std::begin(rhs),
                                                     std::end(rhs), detail::synth_three_way);
    }
+
+   template <typename Iter, std::size_t Size = 0>
+   small_dynamic_array(Iter, Iter)
+      -> small_dynamic_array<typename std::iterator_traits<Iter>::value_type, Size>;
+
+   template <typename Any, typename... U>
+   small_dynamic_array(Any, U...) -> small_dynamic_array<Any, 1 + sizeof...(U)>;
 
    /**
     * @author wmbat wmbat@protonmail.com

@@ -29,6 +29,7 @@
 .cache/
 .clangd/
 documentation/
+compile_commands.json
 
 # Local files
 #
