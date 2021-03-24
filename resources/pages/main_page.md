@@ -1,0 +1,3 @@
+@mainpage
+
+# What is libcaramel?

@@ -28,9 +28,8 @@
 #
 .cache/
 .clangd/
-documentation/
-compile_commands.json
+docs/
 
 # Local files
 #
-.vimspector.json
+compile_commands.json

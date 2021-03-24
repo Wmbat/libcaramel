@@ -1,4 +1,4 @@
-./: {*/ -build/ -documentation/} doc{README.md} manifest
+./: {*/ -build/ -docs/ -resources/} doc{README.md LICENSE} manifest
 
 # Don't install tests.
 #

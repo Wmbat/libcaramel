@@ -1,7 +1,7 @@
 #pragma once
 
 #include <libcaramel/assert.hpp>
-#include <libcaramel/iterators/random_access.hpp>
+#include <libcaramel/iterators/contiguous_iterator.hpp>
 
 #include <algorithm>
 #include <concepts>
@@ -65,8 +65,8 @@ namespace crl
       using const_reference = const value_type&;
       using pointer = typename std::allocator_traits<allocator_type>::pointer;
       using const_pointer = typename std::allocator_traits<allocator_type>::const_pointer;
-      using iterator = random_access_iterator<pointer>;
-      using const_iterator = random_access_iterator<const_pointer>;
+      using iterator = contiguous_iterator<value_type>;
+      using const_iterator = contiguous_iterator<const value_type>;
       using reverse_iterator = std::reverse_iterator<iterator>;
       using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
@@ -1243,8 +1243,8 @@ namespace crl
       using const_reference = const value_type&;
       using pointer = typename std::allocator_traits<allocator_type>::pointer;
       using const_pointer = typename std::allocator_traits<allocator_type>::const_pointer;
-      using iterator = random_access_iterator<pointer>;
-      using const_iterator = random_access_iterator<const_pointer>;
+      using iterator = typename underlying_type::iterator;
+      using const_iterator = typename underlying_type::const_iterator;
       using reverse_iterator = std::reverse_iterator<iterator>;
       using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
@@ -1715,8 +1715,8 @@ namespace crl
       using const_reference = const value_type&;
       using pointer = typename std::allocator_traits<allocator_type>::pointer;
       using const_pointer = typename std::allocator_traits<allocator_type>::const_pointer;
-      using iterator = random_access_iterator<pointer>;
-      using const_iterator = random_access_iterator<const_pointer>;
+      using iterator = typename underlying_type::iterator;
+      using const_iterator = typename underlying_type::const_iterator;
       using reverse_iterator = std::reverse_iterator<iterator>;
       using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
@@ -2155,6 +2155,8 @@ namespace crl
                                                     std::end(rhs), detail::synth_three_way);
    }
 
+   template <typename Iter>
+   dynamic_array(Iter, Iter) -> dynamic_array<typename std::iterator_traits<Iter>::value_type>;
 } // namespace crl
 
 namespace std // NOLINT
