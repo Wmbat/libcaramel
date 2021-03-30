@@ -223,7 +223,7 @@ namespace caramel
 
          if (!is_static() && mp_begin)
          {
-            allocator_traits::deallocate(m_allocator, mp_begin, capacity());
+            allocator_traits::deallocate(m_allocator, mp_begin, static_cast<std::size_t>(capacity()));
          }
 
          reset_to_static();
@@ -1640,6 +1640,7 @@ namespace caramel
        * @param[in] args Arguments to forward to the constructor of the element.
        */
       template <typename... Args>
+         requires std::constructible_from<value_type, Args...>
       constexpr auto append(Args&&... args) -> reference
       {
          return m_underlying.append(std::forward<Args>(args)...);
@@ -2111,6 +2112,7 @@ namespace caramel
        * @param[in] args Arguments to forward to the constructor of the element.
        */
       template <typename... Args>
+         requires std::constructible_from<value_type, Args...>
       constexpr auto append(Args&&... args) -> reference
       {
          return m_underlying.append(std::forward<Args>(args)...);
