@@ -1,7 +1,14 @@
+/**
+ * @file dynamic_array.hpp
+ * @brief Contains the dynamic_array API.
+ * @copyright Copyright (C) 2021 wmbat.
+ */
+
 #pragma once
 
 #include <libcaramel/assert.hpp>
 #include <libcaramel/iterators/contiguous_iterator.hpp>
+#include <libcaramel/util/types.hpp>
 
 #include <algorithm>
 #include <concepts>
@@ -11,7 +18,7 @@
 #include <memory_resource>
 #include <type_traits>
 
-namespace crl
+namespace caramel
 {
    namespace detail
    {
@@ -50,15 +57,14 @@ namespace crl
     * @tparam Allocator The allocator that is used to acquire/release and construct/destroy the
     * elements in that memory.
     */
-   template <typename Any, std::size_t Size,
-             typename Allocator = std::pmr::polymorphic_allocator<Any>>
+   template <typename Any, size_t Size, typename Allocator = std::pmr::polymorphic_allocator<Any>>
    class basic_dynamic_array
    {
       using allocator_traits = std::allocator_traits<Allocator>;
 
    public:
       using value_type = Any;
-      using size_type = std::size_t;
+      using size_type = size_t;
       using difference_type = std::ptrdiff_t;
       using allocator_type = Allocator;
       using reference = value_type&;
@@ -888,6 +894,7 @@ namespace crl
        * @param[in] args Arguments to forward to the constructor of the element.
        */
       template <typename... Args>
+         requires std::constructible_from<value_type, Args...>
       constexpr auto append(Args&&... args) -> reference
       {
          if (size() >= capacity())
@@ -1195,15 +1202,14 @@ namespace crl
       allocator_type m_allocator;
    };
 
-   template <std::equality_comparable Any, std::size_t SizeOne, std::size_t SizeTwo,
-             typename allocator>
+   template <std::equality_comparable Any, size_t SizeOne, size_t SizeTwo, typename allocator>
    constexpr auto operator==(const basic_dynamic_array<Any, SizeOne, allocator>& lhs,
                              const basic_dynamic_array<Any, SizeTwo, allocator>& rhs) -> bool
    {
       return std::equal(std::begin(lhs), std::end(lhs), std::begin(rhs), std::end(rhs));
    }
 
-   template <typename Any, std::size_t SizeOne, std::size_t SizeTwo, typename allocator>
+   template <typename Any, size_t SizeOne, size_t SizeTwo, typename allocator>
    constexpr auto operator<=>(const basic_dynamic_array<Any, SizeOne, allocator>& lhs,
                               const basic_dynamic_array<Any, SizeTwo, allocator>& rhs)
    {
@@ -1211,7 +1217,7 @@ namespace crl
                                                     std::end(rhs), detail::synth_three_way);
    }
 
-   template <typename Iter, std::size_t Size = 0,
+   template <typename Iter, size_t Size = 0,
              typename Allocator =
                 std::pmr::polymorphic_allocator<typename std::iterator_traits<Iter>::value_type>>
    basic_dynamic_array(Iter, Iter)
@@ -1229,14 +1235,14 @@ namespace crl
     * @tparam Any The type of the elements
     * @tparam Size The size of the staticly allocated small buffer.
     */
-   template <typename Any, std::size_t Size>
+   template <typename Any, size_t Size>
    class small_dynamic_array
    {
       using underlying_type = basic_dynamic_array<Any, Size, std::pmr::polymorphic_allocator<Any>>;
 
    public:
       using value_type = Any;
-      using size_type = std::size_t;
+      using size_type = size_t;
       using difference_type = std::ptrdiff_t;
       using allocator_type = std::pmr::polymorphic_allocator<Any>;
       using reference = value_type&;
@@ -1671,14 +1677,14 @@ namespace crl
       underlying_type m_underlying;
    };
 
-   template <std::equality_comparable Any, std::size_t SizeOne, std::size_t SizeTwo>
+   template <std::equality_comparable Any, size_t SizeOne, size_t SizeTwo>
    constexpr auto operator==(const small_dynamic_array<Any, SizeOne>& lhs,
                              const small_dynamic_array<Any, SizeTwo>& rhs) -> bool
    {
       return std::equal(std::begin(lhs), std::end(lhs), std::begin(rhs), std::end(rhs));
    }
 
-   template <typename Any, std::size_t SizeOne, std::size_t SizeTwo>
+   template <typename Any, size_t SizeOne, size_t SizeTwo>
    constexpr auto operator<=>(const small_dynamic_array<Any, SizeOne>& lhs,
                               const small_dynamic_array<Any, SizeTwo>& rhs)
    {
@@ -1686,7 +1692,7 @@ namespace crl
                                                     std::end(rhs), detail::synth_three_way);
    }
 
-   template <typename Iter, std::size_t Size = 0>
+   template <typename Iter, size_t Size = 0>
    small_dynamic_array(Iter, Iter)
       -> small_dynamic_array<typename std::iterator_traits<Iter>::value_type, Size>;
 
@@ -1708,7 +1714,7 @@ namespace crl
 
    public:
       using value_type = Any;
-      using size_type = std::size_t;
+      using size_type = size_t;
       using difference_type = std::ptrdiff_t;
       using allocator_type = std::pmr::polymorphic_allocator<Any>;
       using reference = value_type&;
@@ -2157,7 +2163,7 @@ namespace crl
 
    template <typename Iter>
    dynamic_array(Iter, Iter) -> dynamic_array<typename std::iterator_traits<Iter>::value_type>;
-} // namespace crl
+} // namespace caramel
 
 namespace std // NOLINT
 {
@@ -2169,8 +2175,8 @@ namespace std // NOLINT
     *
     * @return The number of erased elements.
     */
-   template <typename Any, std::size_t Size, typename Allocator, typename Value>
-   constexpr auto erase(crl::basic_dynamic_array<Any, Size, Allocator>& arr, const Value& value)
+   template <typename Any, size_t Size, typename Allocator, typename Value>
+   constexpr auto erase(caramel::basic_dynamic_array<Any, Size, Allocator>& arr, const Value& value)
    {
       const auto it = std::remove(std::begin(arr), std::end(arr), value);
       const auto r = std::distance(it, std::end(arr));
@@ -2186,8 +2192,8 @@ namespace std // NOLINT
     *
     * @return The number of erased elements.
     */
-   template <typename Any, std::size_t Size, typename Allocator, typename Pred>
-   constexpr auto erase_if(crl::basic_dynamic_array<Any, Size, Allocator>& arr, Pred pred)
+   template <typename Any, size_t Size, typename Allocator, typename Pred>
+   constexpr auto erase_if(caramel::basic_dynamic_array<Any, Size, Allocator>& arr, Pred pred)
    {
       const auto it = std::remove_if(std::begin(arr), std::end(arr), pred);
       const auto r = std::distance(it, std::end(arr));
@@ -2203,8 +2209,8 @@ namespace std // NOLINT
     *
     * @return The number of erased elements.
     */
-   template <typename Any, std::size_t Size, typename Value>
-   constexpr auto erase(crl::small_dynamic_array<Any, Size>& arr, const Value& value)
+   template <typename Any, size_t Size, typename Value>
+   constexpr auto erase(caramel::small_dynamic_array<Any, Size>& arr, const Value& value)
    {
       const auto it = std::remove(std::begin(arr), std::end(arr), value);
       const auto r = std::distance(it, std::end(arr));
@@ -2220,8 +2226,8 @@ namespace std // NOLINT
     *
     * @return The number of erased elements.
     */
-   template <typename Any, std::size_t Size, typename Pred>
-   constexpr auto erase_if(crl::small_dynamic_array<Any, Size>& arr, Pred pred)
+   template <typename Any, size_t Size, typename Pred>
+   constexpr auto erase_if(caramel::small_dynamic_array<Any, Size>& arr, Pred pred)
    {
       const auto it = std::remove_if(std::begin(arr), std::end(arr), pred);
       const auto r = std::distance(it, std::end(arr));
@@ -2238,7 +2244,7 @@ namespace std // NOLINT
     * @return The number of erased elements.
     */
    template <typename Any, typename Value>
-   constexpr auto erase(crl::dynamic_array<Any>& arr, const Value& value)
+   constexpr auto erase(caramel::dynamic_array<Any>& arr, const Value& value)
    {
       const auto it = std::remove(std::begin(arr), std::end(arr), value);
       const auto r = std::distance(it, std::end(arr));
@@ -2255,7 +2261,7 @@ namespace std // NOLINT
     * @return The number of erased elements.
     */
    template <typename Any, typename Pred>
-   constexpr auto erase_if(crl::dynamic_array<Any>& arr, Pred pred)
+   constexpr auto erase_if(caramel::dynamic_array<Any>& arr, Pred pred)
    {
       const auto it = std::remove_if(std::begin(arr), std::end(arr), pred);
       const auto r = std::distance(it, std::end(arr));

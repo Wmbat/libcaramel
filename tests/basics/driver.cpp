@@ -7,14 +7,14 @@
 
 TEST_SUITE("dynamic_array test suite")
 {
-   using namespace crl;
+   using namespace caramel;
 
    TEST_CASE("index based lookup")
    {
       SUBCASE("in range index")
       {
-         crl::basic_dynamic_array te{10, 10};
-         crl::basic_dynamic_array test{te.begin(), te.end()};
+         basic_dynamic_array te{10, 10};
+         basic_dynamic_array test{te.begin(), te.end()};
 
          test.append(10);
          [[maybe_unused]] const auto t = *test.begin();

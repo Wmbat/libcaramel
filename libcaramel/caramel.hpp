@@ -1,7 +1,3 @@
-/**
- * @mainpage libcaramel
- */
-
 #pragma once
 
 #include <iosfwd>

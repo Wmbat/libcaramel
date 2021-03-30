@@ -1,9 +1,8 @@
 #pragma once
 
-#include <bits/iterator_concepts.h>
 #include <iterator>
 
-namespace crl
+namespace caramel
 {
    template <typename Any>
    class contiguous_iterator
@@ -115,4 +114,4 @@ namespace crl
    private:
       pointer mp_value{nullptr};
    };
-} // namespace crl
+} // namespace caramel
