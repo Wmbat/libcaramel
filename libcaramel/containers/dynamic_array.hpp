@@ -1,25 +1,33 @@
 /**
- * @file dynamic_array.hpp
+ * @file containers/dynamic_array.hpp
  * @brief Contains the dynamic_array API.
  * @copyright Copyright (C) 2021 wmbat.
  */
 
 #pragma once
 
-#include <libcaramel/assert.hpp>
 #include <libcaramel/iterators/contiguous_iterator.hpp>
+#include <libcaramel/memory/allocator.hpp>
 #include <libcaramel/util/types.hpp>
 
-#include <algorithm>
+#include <gsl/gsl_assert>
+
 #include <concepts>
 #include <cstdint>
 #include <initializer_list>
+#include <limits>
 #include <memory>
-#include <memory_resource>
 #include <type_traits>
 
 namespace caramel
 {
+   struct in_place_t
+   {
+      explicit constexpr in_place_t() = default;
+   };
+
+   inline constexpr in_place_t in_place;
+
    namespace detail
    {
       template <typename First, typename Second>
@@ -57,20 +65,18 @@ namespace caramel
     * @tparam Allocator The allocator that is used to acquire/release and construct/destroy the
     * elements in that memory.
     */
-   template <typename Any, size_t Size, typename Allocator = std::pmr::polymorphic_allocator<Any>>
+   template <typename Any, i64_t Size, typename Allocator = allocator<Any>>
    class basic_dynamic_array
    {
-      using allocator_traits = std::allocator_traits<Allocator>;
-
    public:
       using value_type = Any;
-      using size_type = size_t;
+      using size_type = std::int64_t;
       using difference_type = std::ptrdiff_t;
       using allocator_type = Allocator;
       using reference = value_type&;
       using const_reference = const value_type&;
-      using pointer = typename std::allocator_traits<allocator_type>::pointer;
-      using const_pointer = typename std::allocator_traits<allocator_type>::const_pointer;
+      using pointer = typename Allocator::pointer;
+      using const_pointer = typename Allocator::const_pointer;
       using iterator = contiguous_iterator<value_type>;
       using const_iterator = contiguous_iterator<const value_type>;
       using reverse_iterator = std::reverse_iterator<iterator>;
@@ -80,7 +86,7 @@ namespace caramel
       /**
        * @brief Default constructor.
        */
-      constexpr basic_dynamic_array() noexcept(noexcept(allocator_type{})) = default;
+      constexpr basic_dynamic_array() noexcept = default;
       /**
        * @brief Default construct the container with a given allocator
        *
@@ -90,6 +96,8 @@ namespace caramel
       /**
        * @brief Construct the container with count copies of elements with value value
        *
+       * @pre `count >= 0`, otherwise UB
+       *
        * @param[in] count The size of the container.
        * @param[in] The value to initialize elements from.
        * @param[in] allocator The allocator to use for all memory allocations of this container.
@@ -98,6 +106,8 @@ namespace caramel
                                     const allocator_type& allocator = allocator_type{}) :
          m_allocator{allocator}
       {
+         Expects(count >= 0);
+
          assign(count, value);
       }
       /**
@@ -156,7 +166,7 @@ namespace caramel
 
             if (!is_static())
             {
-               allocator_traits::deallocate(m_allocator, mp_begin, capacity());
+               m_allocator.deallocate(gsl::make_not_null(mp_begin), count_t{capacity()});
             }
 
             reset_to_static();
@@ -202,7 +212,7 @@ namespace caramel
 
          if (!is_static())
          {
-            allocator_traits::deallocate(m_allocator, mp_begin, capacity());
+            m_allocator.deallocate(gsl::make_not_null(mp_begin), count_t{capacity()});
          }
 
          reset_to_static();
@@ -223,7 +233,7 @@ namespace caramel
 
          if (!is_static() && mp_begin)
          {
-            allocator_traits::deallocate(m_allocator, mp_begin, static_cast<std::size_t>(capacity()));
+            m_allocator.deallocate(gsl::make_not_null(mp_begin), count_t{capacity()});
          }
 
          reset_to_static();
@@ -238,7 +248,20 @@ namespace caramel
       {
          if (this != &rhs)
          {
-            copy_assign_alloc(rhs);
+            if (m_allocator != rhs.m_allocator)
+            {
+               clear();
+
+               if (!is_static())
+               {
+                  m_allocator.deallocate(gsl::make_not_null(mp_begin), count_t{capacity()});
+               }
+
+               reset_to_static();
+            }
+
+            m_allocator = rhs.m_allocator;
+
             assign(rhs.begin(), rhs.end());
          }
 
@@ -250,13 +273,40 @@ namespace caramel
        *
        * @param[in] rhs other container to use as a data source.
        */
-      constexpr auto operator=(basic_dynamic_array&& rhs) noexcept(
-         allocator_traits::propagate_on_container_move_assignment::value ||
-         allocator_traits::is_always_equal::value) -> basic_dynamic_array&
+      constexpr auto operator=(basic_dynamic_array&& rhs) noexcept -> basic_dynamic_array&
       {
-         move_assign(rhs,
-                     std::integral_constant<
-                        bool, allocator_traits::propagate_on_container_move_assignment::value>());
+         if (m_allocator != rhs.allocator())
+         {
+            using move_it = std::move_iterator<iterator>;
+            assign(move_it{rhs.begin()}, move_it{rhs.end()});
+
+            rhs.reset_to_static();
+         }
+         else
+         {
+            if (!rhs.is_static())
+            {
+               if (!is_static())
+               {
+                  clear();
+
+                  m_allocator.deallocate(gsl::make_not_null(mp_begin), count_t{capacity()});
+
+                  reset_to_static();
+               }
+
+               m_size = rhs.size();
+               m_capacity = rhs.capacity();
+               mp_begin = rhs.mp_begin;
+            }
+            else
+            {
+               using move_it = std::move_iterator<iterator>;
+               assign(move_it{rhs.begin()}, move_it{rhs.end()});
+            }
+
+            rhs.reset_to_static();
+         }
 
          return *this;
       }
@@ -278,35 +328,38 @@ namespace caramel
        *
        * @return The associated allocator.
        */
-      constexpr auto allocator() const noexcept -> allocator_type { return m_allocator; }
+      constexpr auto allocator() const noexcept -> allocator_type* { return &m_allocator; }
 
       /**
        * @brief Access the object stored at a specific index.
        *
-       * @param index The position to lookup the object in the array
+       * @pre 'index < size()'.
+       * @pre 'index >= 0'.
        *
-       * @pre index must be less than the size.
+       * @param[in] index The position to lookup the object in the array
        *
        * @return A reference to the object stored at index.
        */
       constexpr auto lookup(size_type index) -> reference
       {
-         EXPECT(index < m_size);
+         Expects(index < m_size);
+         Expects(index >= 0);
 
          return mp_begin[index];
       }
       /**
        * @brief Access the object stored at a specific index.
        *
-       * @param index The position to lookup the object in the array
+       * @pre 'index < size()'.
+       * @pre 'index >= 0'.
        *
-       * @pre index must be less than the size.
+       * @param[in] index The position to lookup the object in the array
        *
        * @return A const reference to the object stored at index.
        */
       constexpr auto lookup(size_type index) const -> const_reference
       {
-         EXPECT(index < m_size);
+         Expects(index < m_size);
 
          return mp_begin[index];
       }
@@ -486,7 +539,7 @@ namespace caramel
        */
       constexpr void clear() noexcept
       {
-         destroy(begin(), end());
+         std::destroy(begin(), end());
          m_size = 0;
       }
 
@@ -504,8 +557,8 @@ namespace caramel
        */
       constexpr auto insert(const_iterator pos, const_reference value) -> iterator
       {
-         EXPECT(pos >= cbegin());
-         EXPECT(pos <= cend());
+         Expects(pos >= cbegin());
+         Expects(pos <= cend());
 
          if (pos == cend())
          {
@@ -526,8 +579,7 @@ namespace caramel
             new_pos = begin() + (pos - cbegin());
          }
 
-         construct(offset(size()), std::move(*(end() - 1)));
-
+         std::construct_at(offset(size()), std::move(*(end() - 1)));
          std::move_backward(new_pos, end() - 1, end());
 
          ++m_size;
@@ -557,8 +609,8 @@ namespace caramel
        */
       constexpr auto insert(const_iterator pos, value_type&& value) -> iterator
       {
-         EXPECT(pos >= cbegin());
-         EXPECT(pos <= cend());
+         Expects(pos >= cbegin());
+         Expects(pos <= cend());
 
          if (pos == cend())
          {
@@ -610,12 +662,12 @@ namespace caramel
       template <typename... Args>
       constexpr auto insert(const_iterator pos, Args... args) -> iterator
       {
-         EXPECT(pos >= cbegin());
-         EXPECT(pos <= cend());
+         Expects(pos >= cbegin());
+         Expects(pos <= cend());
 
          if (pos == cend())
          {
-            append(std::forward<Args>(args)...);
+            append(in_place, std::forward<Args>(args)...);
 
             return end() - 1;
          }
@@ -657,8 +709,8 @@ namespace caramel
        */
       constexpr auto insert(const_iterator pos, size_type count, const_reference value) -> iterator
       {
-         EXPECT(pos >= cbegin());
-         EXPECT(pos <= cend());
+         Expects(pos >= cbegin());
+         Expects(pos <= cend());
 
          size_type start_index = pos - cbegin();
 
@@ -718,8 +770,8 @@ namespace caramel
       template <std::input_iterator InputIt>
       constexpr auto insert(const_iterator pos, InputIt first, InputIt last) -> iterator
       {
-         EXPECT(pos >= cbegin());
-         EXPECT(pos <= cend());
+         Expects(pos >= cbegin());
+         Expects(pos <= cend());
 
          size_type start_index = pos - cbegin();
          difference_type count = std::distance(first, last);
@@ -799,8 +851,8 @@ namespace caramel
        */
       constexpr auto erase(const_iterator pos) -> iterator
       {
-         EXPECT(pos >= cbegin());
-         EXPECT(pos <= cend());
+         Expects(pos >= cbegin());
+         Expects(pos <= cend());
 
          if (pos == cend())
          {
@@ -831,9 +883,9 @@ namespace caramel
        */
       constexpr auto erase(const_iterator first, const_iterator last) -> iterator
       {
-         EXPECT(first >= cbegin());
-         EXPECT(last <= cend());
-         EXPECT(first >= last);
+         Expects(first >= cbegin());
+         Expects(last <= cend());
+         Expects(first >= last);
 
          if (first == last)
          {
@@ -846,7 +898,7 @@ namespace caramel
          iterator it_l = begin() + (last - cbegin());
          iterator it = std::move(it_l, end(), it_f);
 
-         destroy(it, end());
+         std::destroy(it, end());
 
          m_size -= distance;
 
@@ -894,15 +946,16 @@ namespace caramel
        * @param[in] args Arguments to forward to the constructor of the element.
        */
       template <typename... Args>
-         requires std::constructible_from<value_type, Args...>
-      constexpr auto append(Args&&... args) -> reference
+      requires std::constructible_from<value_type, Args...> constexpr auto append(in_place_t,
+                                                                                  Args&&... args)
+         -> reference
       {
          if (size() >= capacity())
          {
             grow();
          }
 
-         construct(mp_begin + size(), std::forward<Args>(args)...);
+         std::construct_at(offset(size()), std::forward<Args>(args)...);
 
          ++m_size;
 
@@ -916,9 +969,9 @@ namespace caramel
        */
       constexpr void pop_back()
       {
-         EXPECT(size() != 0);
+         Expects(size() != 0);
 
-         destroy(offset(size()));
+         std::destroy_at(offset(size()));
          --m_size;
       };
 
@@ -933,7 +986,7 @@ namespace caramel
       {
          if (size() > count)
          {
-            destroy(begin() + count, end());
+            std::destroy(begin() + count, end());
             m_size = count;
          }
          else if (size() < count)
@@ -963,7 +1016,7 @@ namespace caramel
       {
          if (size() > count)
          {
-            destroy(begin() + count, end());
+            std::destroy(begin() + count, end());
             m_size = count;
          }
          else if (size() < count)
@@ -992,11 +1045,8 @@ namespace caramel
 
       constexpr void grow(size_type min_size = 0)
       {
-         EXPECT(min_size > std::numeric_limits<difference_type>::max());
-         EXPECT(capacity() == std::numeric_limits<difference_type>::max());
-
          const auto new_capacity = compute_new_capacity(std::max(m_capacity + 1, min_size));
-         auto new_elements = allocator_traits::allocate(m_allocator, new_capacity);
+         auto* new_elements = m_allocator.allocate(count_t{new_capacity});
 
          if constexpr (std::is_move_constructible_v<value_type>)
          {
@@ -1007,11 +1057,14 @@ namespace caramel
             std::uninitialized_copy(begin(), end(), iterator{new_elements});
          }
 
-         destroy(begin(), end());
+         std::destroy(begin(), end());
 
          if (!is_static())
          {
-            allocator_traits::deallocate(m_allocator, mp_begin, capacity());
+            if (mp_begin)
+            {
+               m_allocator.deallocate(gsl::make_not_null(mp_begin), count_t{capacity()});
+            }
          }
 
          mp_begin = new_elements;
@@ -1023,115 +1076,6 @@ namespace caramel
          mp_begin = get_first_element();
          m_size = 0;
          m_capacity = Size;
-      }
-
-      template <typename... Args>
-      constexpr void construct(pointer p_loc, Args&&... args)
-      {
-         if (is_static())
-         {
-            std::construct_at(p_loc, std::forward<Args>(args)...);
-         }
-         else
-         {
-            allocator_traits::construct(m_allocator, p_loc, std::forward<Args>(args)...);
-         }
-      }
-
-      constexpr void destroy(pointer p_loc)
-      {
-         if (is_static())
-         {
-            std::destroy_at(p_loc);
-         }
-         else
-         {
-            allocator_traits::destroy(m_allocator, p_loc);
-         }
-      }
-      constexpr void destroy(iterator beg, iterator end)
-      {
-         if (is_static())
-         {
-            std::destroy(beg, end);
-         }
-         else
-         {
-            std::for_each(beg, end, [&](auto& value) {
-               allocator_traits::destroy(m_allocator, std::addressof(value));
-            });
-         }
-      }
-      constexpr void copy_assign_alloc(const basic_dynamic_array& other)
-      {
-         if constexpr (allocator_traits::propagate_on_container_copy_assignment::value)
-         {
-            if (m_allocator != other.m_allocator)
-            {
-               clear();
-
-               if (!is_static())
-               {
-                  allocator_traits::deallocate(m_allocator, mp_begin, capacity());
-               }
-
-               reset_to_static();
-            }
-
-            m_allocator = other.m_allocator;
-         }
-      }
-
-      constexpr void move_assign_alloc(const basic_dynamic_array& other)
-      {
-         if constexpr (allocator_traits::propagate_on_container_move_assignment::value)
-         {
-            m_allocator = std::move(other.m_allocator);
-         }
-      }
-
-      constexpr void move_assign(basic_dynamic_array& other, std::false_type /*u*/)
-      {
-         if (m_allocator != other.m_allocator)
-         {
-            using mi = std::move_iterator<iterator>;
-            assign(mi{other.begin()}, mi{other.end()});
-
-            other.reset_to_static();
-         }
-         else
-         {
-            move_assign(other, std::true_type{});
-         }
-      }
-      constexpr void move_assign(basic_dynamic_array& other, std::true_type /*u*/)
-      {
-         if (!other.is_static())
-         {
-            if (!is_static())
-            {
-               clear();
-
-               allocator_traits::deallocate(m_allocator, mp_begin, capacity());
-
-               reset_to_static();
-            }
-
-            move_assign_alloc(other);
-
-            m_size = other.size();
-            m_capacity = other.capacity();
-            mp_begin = other.mp_begin;
-         }
-         else
-         {
-            using mi = std::move_iterator<iterator>;
-            assign(mi{other.begin()}, mi{other.end()});
-
-            move_assign_alloc(other);
-         }
-
-         other.reset_to_static();
       }
 
       constexpr void assign(size_type count, const_reference value)
@@ -1174,7 +1118,8 @@ namespace caramel
 
       static constexpr auto compute_new_capacity(size_type min_capacity) -> size_type
       {
-         constexpr auto max_capacity = size_type{1} << (std::numeric_limits<size_type>::digits - 1);
+         constexpr auto max_digits = std::numeric_limits<size_type>::digits;
+         constexpr auto max_capacity = size_type{1} << (max_digits - 1);
 
          if (min_capacity > max_capacity)
          {
@@ -1183,7 +1128,7 @@ namespace caramel
 
          --min_capacity;
 
-         for (auto i = 1U; i < std::numeric_limits<size_type>::digits; i *= 2)
+         for (size_type i = 1; i < max_digits; i *= 2)
          {
             min_capacity |= min_capacity >> i;
          }
@@ -1202,14 +1147,14 @@ namespace caramel
       allocator_type m_allocator;
    };
 
-   template <std::equality_comparable Any, size_t SizeOne, size_t SizeTwo, typename allocator>
+   template <std::equality_comparable Any, i64_t SizeOne, i64_t SizeTwo, typename allocator>
    constexpr auto operator==(const basic_dynamic_array<Any, SizeOne, allocator>& lhs,
                              const basic_dynamic_array<Any, SizeTwo, allocator>& rhs) -> bool
    {
       return std::equal(std::begin(lhs), std::end(lhs), std::begin(rhs), std::end(rhs));
    }
 
-   template <typename Any, size_t SizeOne, size_t SizeTwo, typename allocator>
+   template <typename Any, i64_t SizeOne, i64_t SizeTwo, typename allocator>
    constexpr auto operator<=>(const basic_dynamic_array<Any, SizeOne, allocator>& lhs,
                               const basic_dynamic_array<Any, SizeTwo, allocator>& rhs)
    {
@@ -1217,13 +1162,12 @@ namespace caramel
                                                     std::end(rhs), detail::synth_three_way);
    }
 
-   template <typename Iter, size_t Size = 0,
-             typename Allocator =
-                std::pmr::polymorphic_allocator<typename std::iterator_traits<Iter>::value_type>>
+   template <typename Iter, i64_t Size = 0,
+             typename Allocator = allocator<typename std::iterator_traits<Iter>::value_type>>
    basic_dynamic_array(Iter, Iter)
       -> basic_dynamic_array<typename std::iterator_traits<Iter>::value_type, Size, Allocator>;
 
-   template <typename Any, typename... U, typename Allocator = std::pmr::polymorphic_allocator<Any>>
+   template <typename Any, typename... U, typename Allocator = allocator<Any>>
    basic_dynamic_array(Any, U...) -> basic_dynamic_array<Any, 1 + sizeof...(U), Allocator>;
 
    /**
@@ -1235,16 +1179,16 @@ namespace caramel
     * @tparam Any The type of the elements
     * @tparam Size The size of the staticly allocated small buffer.
     */
-   template <typename Any, size_t Size>
+   template <typename Any, i64_t Size>
    class small_dynamic_array
    {
-      using underlying_type = basic_dynamic_array<Any, Size, std::pmr::polymorphic_allocator<Any>>;
+      using underlying_type = basic_dynamic_array<Any, Size, allocator<Any>>;
 
    public:
       using value_type = Any;
-      using size_type = size_t;
+      using size_type = typename underlying_type::size_type;
       using difference_type = std::ptrdiff_t;
-      using allocator_type = std::pmr::polymorphic_allocator<Any>;
+      using allocator_type = typename underlying_type::allocator_type;
       using reference = value_type&;
       using const_reference = const value_type&;
       using pointer = typename std::allocator_traits<allocator_type>::pointer;
@@ -1299,9 +1243,10 @@ namespace caramel
       /**
        * @brief Access the object stored at a specific index.
        *
-       * @param index The position to lookup the object in the array
+       * @pre 'index < size()'.
+       * @pre 'index >= 0'.
        *
-       * @pre index must be less than the size.
+       * @param[in] index The position to lookup the object in the array
        *
        * @return A reference to the object stored at index.
        */
@@ -1309,9 +1254,10 @@ namespace caramel
       /**
        * @brief Access the object stored at a specific index.
        *
-       * @param index The position to lookup the object in the array
+       * @pre 'index < size()'.
+       * @pre 'index >= 0'.
        *
-       * @pre index must be less than the size.
+       * @param[in] index The position to lookup the object in the array
        *
        * @return A const reference to the object stored at index.
        */
@@ -1640,10 +1586,11 @@ namespace caramel
        * @param[in] args Arguments to forward to the constructor of the element.
        */
       template <typename... Args>
-         requires std::constructible_from<value_type, Args...>
-      constexpr auto append(Args&&... args) -> reference
+      requires std::constructible_from<value_type, Args...> constexpr auto append(in_place_t,
+                                                                                  Args&&... args)
+         -> reference
       {
-         return m_underlying.append(std::forward<Args>(args)...);
+         return m_underlying.append(in_place, std::forward<Args>(args)...);
       }
 
       /**
@@ -1678,14 +1625,14 @@ namespace caramel
       underlying_type m_underlying;
    };
 
-   template <std::equality_comparable Any, size_t SizeOne, size_t SizeTwo>
+   template <std::equality_comparable Any, i64_t SizeOne, i64_t SizeTwo>
    constexpr auto operator==(const small_dynamic_array<Any, SizeOne>& lhs,
                              const small_dynamic_array<Any, SizeTwo>& rhs) -> bool
    {
       return std::equal(std::begin(lhs), std::end(lhs), std::begin(rhs), std::end(rhs));
    }
 
-   template <typename Any, size_t SizeOne, size_t SizeTwo>
+   template <typename Any, i64_t SizeOne, i64_t SizeTwo>
    constexpr auto operator<=>(const small_dynamic_array<Any, SizeOne>& lhs,
                               const small_dynamic_array<Any, SizeTwo>& rhs)
    {
@@ -1693,7 +1640,7 @@ namespace caramel
                                                     std::end(rhs), detail::synth_three_way);
    }
 
-   template <typename Iter, size_t Size = 0>
+   template <typename Iter, i64_t Size = 0>
    small_dynamic_array(Iter, Iter)
       -> small_dynamic_array<typename std::iterator_traits<Iter>::value_type, Size>;
 
@@ -1711,17 +1658,17 @@ namespace caramel
    template <typename Any>
    class dynamic_array
    {
-      using underlying_type = basic_dynamic_array<Any, 0u, std::pmr::polymorphic_allocator<Any>>;
+      using underlying_type = basic_dynamic_array<Any, 0u, allocator<Any>>;
 
    public:
       using value_type = Any;
-      using size_type = size_t;
+      using size_type = typename underlying_type::size_type;
       using difference_type = std::ptrdiff_t;
-      using allocator_type = std::pmr::polymorphic_allocator<Any>;
+      using allocator_type = typename underlying_type::allocator_type;
       using reference = value_type&;
       using const_reference = const value_type&;
-      using pointer = typename std::allocator_traits<allocator_type>::pointer;
-      using const_pointer = typename std::allocator_traits<allocator_type>::const_pointer;
+      using pointer = typename allocator_type::pointer;
+      using const_pointer = typename allocator_type::const_pointer;
       using iterator = typename underlying_type::iterator;
       using const_iterator = typename underlying_type::const_iterator;
       using reverse_iterator = std::reverse_iterator<iterator>;
@@ -1771,9 +1718,10 @@ namespace caramel
       /**
        * @brief Access the object stored at a specific index.
        *
-       * @param index The position to lookup the object in the array
+       * @pre 'index < size()'.
+       * @pre 'index >= 0'.
        *
-       * @pre index must be less than the size.
+       * @param[in] index The position to lookup the object in the array
        *
        * @return A reference to the object stored at index.
        */
@@ -1781,9 +1729,10 @@ namespace caramel
       /**
        * @brief Access the object stored at a specific index.
        *
-       * @param index The position to lookup the object in the array
+       * @pre 'index < size()'.
+       * @pre 'index >= 0'.
        *
-       * @pre index must be less than the size.
+       * @param[in] index The position to lookup the object in the array
        *
        * @return A const reference to the object stored at index.
        */
@@ -2112,10 +2061,11 @@ namespace caramel
        * @param[in] args Arguments to forward to the constructor of the element.
        */
       template <typename... Args>
-         requires std::constructible_from<value_type, Args...>
-      constexpr auto append(Args&&... args) -> reference
+      requires std::constructible_from<value_type, Args...> constexpr auto append(in_place_t,
+                                                                                  Args&&... args)
+         -> reference
       {
-         return m_underlying.append(std::forward<Args>(args)...);
+         return m_underlying.append(in_place, std::forward<Args>(args)...);
       }
 
       /**
@@ -2166,108 +2116,3 @@ namespace caramel
    template <typename Iter>
    dynamic_array(Iter, Iter) -> dynamic_array<typename std::iterator_traits<Iter>::value_type>;
 } // namespace caramel
-
-namespace std // NOLINT
-{
-   /**
-    * @brief Erases all elements that compare equal to value from the container.
-    *
-    * @param[in] arr Container from which to erase.
-    * @param[in] value Value to be removed.
-    *
-    * @return The number of erased elements.
-    */
-   template <typename Any, size_t Size, typename Allocator, typename Value>
-   constexpr auto erase(caramel::basic_dynamic_array<Any, Size, Allocator>& arr, const Value& value)
-   {
-      const auto it = std::remove(std::begin(arr), std::end(arr), value);
-      const auto r = std::distance(it, std::end(arr));
-      arr.erase(it, std::end(arr));
-      return r;
-   }
-
-   /**
-    * @brief Erases all elements that satisfy the predicate pred from the container.
-    *
-    * @param[in] arr Container from which to erase.
-    * @param[in] pred Unary predicate which returns `true` if the element should be erased.
-    *
-    * @return The number of erased elements.
-    */
-   template <typename Any, size_t Size, typename Allocator, typename Pred>
-   constexpr auto erase_if(caramel::basic_dynamic_array<Any, Size, Allocator>& arr, Pred pred)
-   {
-      const auto it = std::remove_if(std::begin(arr), std::end(arr), pred);
-      const auto r = std::distance(it, std::end(arr));
-      arr.erase(it, std::end(arr));
-      return r;
-   }
-
-   /**
-    * @brief Erases all elements that compare equal to value from the container.
-    *
-    * @param[in] arr Container from which to erase.
-    * @param[in] value Value to be removed.
-    *
-    * @return The number of erased elements.
-    */
-   template <typename Any, size_t Size, typename Value>
-   constexpr auto erase(caramel::small_dynamic_array<Any, Size>& arr, const Value& value)
-   {
-      const auto it = std::remove(std::begin(arr), std::end(arr), value);
-      const auto r = std::distance(it, std::end(arr));
-      arr.erase(it, std::end(arr));
-      return r;
-   }
-
-   /**
-    * @brief Erases all elements that satisfy the predicate pred from the container.
-    *
-    * @param[in] arr Container from which to erase.
-    * @param[in] pred Unary predicate which returns `true` if the element should be erased.
-    *
-    * @return The number of erased elements.
-    */
-   template <typename Any, size_t Size, typename Pred>
-   constexpr auto erase_if(caramel::small_dynamic_array<Any, Size>& arr, Pred pred)
-   {
-      const auto it = std::remove_if(std::begin(arr), std::end(arr), pred);
-      const auto r = std::distance(it, std::end(arr));
-      arr.erase(it, std::end(arr));
-      return r;
-   }
-
-   /**
-    * @brief Erases all elements that compare equal to value from the container.
-    *
-    * @param[in] arr Container from which to erase.
-    * @param[in] value Value to be removed.
-    *
-    * @return The number of erased elements.
-    */
-   template <typename Any, typename Value>
-   constexpr auto erase(caramel::dynamic_array<Any>& arr, const Value& value)
-   {
-      const auto it = std::remove(std::begin(arr), std::end(arr), value);
-      const auto r = std::distance(it, std::end(arr));
-      arr.erase(it, std::end(arr));
-      return r;
-   }
-
-   /**
-    * @brief Erases all elements that satisfy the predicate pred from the container.
-    *
-    * @param[in] arr Container from which to erase.
-    * @param[in] pred Unary predicate which returns `true` if the element should be erased.
-    *
-    * @return The number of erased elements.
-    */
-   template <typename Any, typename Pred>
-   constexpr auto erase_if(caramel::dynamic_array<Any>& arr, Pred pred)
-   {
-      const auto it = std::remove_if(std::begin(arr), std::end(arr), pred);
-      const auto r = std::distance(it, std::end(arr));
-      arr.erase(it, std::end(arr));
-      return r;
-   }
-} // namespace std

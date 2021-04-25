@@ -1,4 +1,5 @@
 import libs = libcaramel%lib{caramel}
 import libs += doctest%lib{doctest}
+import libs += gsl%lib{gsl}
 
-exe{driver}: {hxx ixx txx cxx}{**} $libs testscript{**}
+exe{driver}: {mxx hxx cxx}{**} $libs testscript{**}

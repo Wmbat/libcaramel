@@ -1,7 +1,9 @@
 intf_libs = # Interface dependencies.
 impl_libs = # Implementation dependencies.
 
-./: lib{caramel}: libul{caramel}: {hxx ixx txx cxx}{** -**.test... -version} \
+import intf_libs += gsl%lib{gsl}
+
+./: lib{caramel}: libul{caramel}: {mxx hxx cxx}{** -**.test... -version} \
   hxx{version} $impl_libs $intf_libs
 
 # Unit tests.
