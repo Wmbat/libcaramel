@@ -3,25 +3,8 @@ impl_libs = # Implementation dependencies.
 
 import intf_libs += gsl%lib{gsl}
 
-./: lib{caramel}: libul{caramel}: {mxx hxx cxx}{** -**.test... -version} \
+./: lib{caramel}: libul{caramel}: {mxx hxx cxx}{** -version} \
   hxx{version} $impl_libs $intf_libs
-
-# Unit tests.
-#
-exe{*.test}:
-{
-  test = true
-  install = false
-}
-
-for t: cxx{**.test...}
-{
-  d = $directory($t)
-  n = $name($t)...
-
-  ./: $d/exe{$n}: $t $d/{hxx ixx txx}{+$n} $d/testscript{+$n}
-  $d/exe{$n}: libul{caramel}: bin.whole = false
-}
 
 # Include the generated version header into the distribution (so that we don't
 # pick up an installed one) and don't remove it when cleaning in src (so that
@@ -63,7 +46,7 @@ else
 # Install into the libcaramel/ subdirectory of, say, /usr/include/
 # recreating subdirectories.
 #
-{hxx ixx txx}{*}:
+{mxx hxx}{*}:
 {
   install         = include/libcaramel/
   install.subdirs = true
