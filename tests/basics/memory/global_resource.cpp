@@ -1,7 +1,9 @@
-#include "gsl/pointers"
 #include <doctest/doctest.h>
 
 #include <libcaramel/memory/global_resource.hpp>
+#include <libcaramel/util/types.hpp>
+
+#include <gsl/pointers>
 
 #include <memory>
 

@@ -1,9 +1,5 @@
 #include <libcaramel/memory/global_resource.hpp>
 
-#include <gsl/gsl_assert>
-
-#include <new>
-
 namespace caramel
 {
    auto global_resource::allocate(count_t bytes, align_t alignment) noexcept -> pointer

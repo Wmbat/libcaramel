@@ -19,6 +19,32 @@
 #include <memory>
 #include <type_traits>
 
+namespace caramel::detail
+{
+   template <typename First, typename Second>
+   auto synth_three_way(const First& lhs, const Second& rhs)
+   {
+      if constexpr (std::three_way_comparable_with<First, Second>)
+      {
+         return lhs <=> rhs;
+      }
+      else
+      {
+         if (lhs == rhs)
+         {
+            return std::strong_ordering::equal;
+         }
+
+         if (lhs < rhs)
+         {
+            return std::strong_ordering::less;
+         }
+
+         return std::strong_ordering::greater;
+      }
+   }
+} // namespace caramel::detail
+
 namespace caramel
 {
    struct in_place_t
@@ -27,32 +53,6 @@ namespace caramel
    };
 
    inline constexpr in_place_t in_place;
-
-   namespace detail
-   {
-      template <typename First, typename Second>
-      auto synth_three_way(const First& lhs, const Second& rhs)
-      {
-         if constexpr (std::three_way_comparable_with<First, Second>)
-         {
-            return lhs <=> rhs;
-         }
-         else
-         {
-            if (lhs == rhs)
-            {
-               return std::strong_ordering::equal;
-            }
-
-            if (lhs < rhs)
-            {
-               return std::strong_ordering::less;
-            }
-
-            return std::strong_ordering::greater;
-         }
-      }
-   } // namespace detail
 
    /**
     * @author wmbat wmbat@protonmail.com

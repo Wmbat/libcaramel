@@ -911,6 +911,7 @@ FILE_PATTERNS          = *.c \
                          *.hh \
                          *.hxx \
                          *.hpp \
+                         *.mpp \
                          *.h++ \
                          *.cs \
                          *.d \

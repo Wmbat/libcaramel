@@ -20,6 +20,8 @@ private:
 
 TEST_SUITE("dynamic_array test suite")
 {
+   TEST_CASE("default ctor") {}
+
    TEST_CASE("append in place")
    {
       dynamic_array<simple_class> test;
