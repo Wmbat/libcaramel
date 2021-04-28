@@ -11,20 +11,20 @@
 namespace caramel
 {
    template <typename Any>
-   class allocator
+   class memory_allocator
    {
    public:
       using pointer = Any*;
       using const_pointer = const Any*;
 
    public:
-      allocator() noexcept : mp_resource(get_default_memory_resource()) {}
-      allocator(memory_resource* p_resource) noexcept : mp_resource{p_resource} {}
+      memory_allocator() noexcept : mp_resource(get_default_memory_resource()) {}
+      memory_allocator(memory_resource* p_resource) noexcept : mp_resource{p_resource} {}
       template <typename U>
-      allocator(const allocator<U>& other) noexcept : mp_resource{other.resource()}
+      memory_allocator(const memory_allocator<U>& other) noexcept : mp_resource{other.resource()}
       {}
 
-      auto operator==(const allocator& alloc) const -> bool
+      auto operator==(const memory_allocator& alloc) const -> bool
       {
          return *resource() == *alloc.resource();
       }

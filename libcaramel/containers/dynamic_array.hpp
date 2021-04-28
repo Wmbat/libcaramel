@@ -7,7 +7,7 @@
 #pragma once
 
 #include <libcaramel/iterators/contiguous_iterator.hpp>
-#include <libcaramel/memory/allocator.hpp>
+#include <libcaramel/memory/memory_allocator.hpp>
 #include <libcaramel/util/types.hpp>
 
 #include <gsl/gsl_assert>
@@ -65,7 +65,7 @@ namespace caramel
     * @tparam Allocator The allocator that is used to acquire/release and construct/destroy the
     * elements in that memory.
     */
-   template <typename Any, i64_t Size, typename Allocator = allocator<Any>>
+   template <typename Any, i64_t Size, typename Allocator = memory_allocator<Any>>
    class basic_dynamic_array
    {
    public:
@@ -102,8 +102,9 @@ namespace caramel
        * @param[in] The value to initialize elements from.
        * @param[in] allocator The allocator to use for all memory allocations of this container.
        */
-      constexpr basic_dynamic_array(size_type count, const_reference value,
-                                    const allocator_type& allocator = allocator_type{}) :
+      constexpr basic_dynamic_array(
+         size_type count, const_reference value,
+         const allocator_type& allocator = allocator_type{}) requires std::copyable<value_type> :
          m_allocator{allocator}
       {
          Expects(count >= 0);
@@ -328,7 +329,7 @@ namespace caramel
        *
        * @return The associated allocator.
        */
-      constexpr auto allocator() const noexcept -> allocator_type* { return &m_allocator; }
+      constexpr auto allocator() const noexcept -> allocator_type { return m_allocator; }
 
       /**
        * @brief Access the object stored at a specific index.
@@ -1163,11 +1164,11 @@ namespace caramel
    }
 
    template <typename Iter, i64_t Size = 0,
-             typename Allocator = allocator<typename std::iterator_traits<Iter>::value_type>>
+             typename Allocator = memory_allocator<typename std::iterator_traits<Iter>::value_type>>
    basic_dynamic_array(Iter, Iter)
       -> basic_dynamic_array<typename std::iterator_traits<Iter>::value_type, Size, Allocator>;
 
-   template <typename Any, typename... U, typename Allocator = allocator<Any>>
+   template <typename Any, typename... U, typename Allocator = memory_allocator<Any>>
    basic_dynamic_array(Any, U...) -> basic_dynamic_array<Any, 1 + sizeof...(U), Allocator>;
 
    /**
@@ -1182,7 +1183,7 @@ namespace caramel
    template <typename Any, i64_t Size>
    class small_dynamic_array
    {
-      using underlying_type = basic_dynamic_array<Any, Size, allocator<Any>>;
+      using underlying_type = basic_dynamic_array<Any, Size, memory_allocator<Any>>;
 
    public:
       using value_type = Any;
@@ -1209,7 +1210,8 @@ namespace caramel
        * @param[in] count The size of the container.
        * @param[in] The value to initialize elements from.
        */
-      constexpr small_dynamic_array(size_type count, const_reference value) :
+      constexpr small_dynamic_array(size_type count,
+                                    const_reference value) requires std::copyable<value_type> :
          m_underlying{count, value}
       {}
       /**
@@ -1238,6 +1240,16 @@ namespace caramel
          m_underlying = init_list;
 
          return *this;
+      }
+
+      /**
+       * @brief Returns the allocator associated with the container.
+       *
+       * @return The associated allocator.
+       */
+      constexpr auto allocator() const noexcept -> allocator_type
+      {
+         return m_underlying.allocator();
       }
 
       /**
@@ -1658,7 +1670,7 @@ namespace caramel
    template <typename Any>
    class dynamic_array
    {
-      using underlying_type = basic_dynamic_array<Any, 0u, allocator<Any>>;
+      using underlying_type = basic_dynamic_array<Any, 0u, memory_allocator<Any>>;
 
    public:
       using value_type = Any;
@@ -1685,7 +1697,9 @@ namespace caramel
        * @param[in] count The size of the container.
        * @param[in] The value to initialize elements from.
        */
-      constexpr dynamic_array(size_type count, const_reference value) : m_underlying{count, value}
+      constexpr dynamic_array(size_type count,
+                              const_reference value) requires std::copyable<value_type> :
+         m_underlying{count, value}
       {}
       /**
        * @brief Construct the container with the contents of the initializer list init.
@@ -1713,6 +1727,16 @@ namespace caramel
          m_underlying = init_list;
 
          return *this;
+      }
+
+      /**
+       * @brief Returns the allocator associated with the container.
+       *
+       * @return The associated allocator.
+       */
+      constexpr auto allocator() const noexcept -> allocator_type
+      {
+         return m_underlying.allocator();
       }
 
       /**
