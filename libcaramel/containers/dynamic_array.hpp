@@ -102,9 +102,8 @@ namespace caramel
        * @param[in] The value to initialize elements from.
        * @param[in] allocator The allocator to use for all memory allocations of this container.
        */
-      constexpr basic_dynamic_array(
-         size_type count, const_reference value,
-         const allocator_type& allocator = allocator_type{}) requires std::copyable<value_type> :
+      constexpr basic_dynamic_array(size_type count, const_reference value,
+                                    const allocator_type& allocator = allocator_type{}) :
          m_allocator{allocator}
       {
          Expects(count >= 0);
@@ -1210,8 +1209,7 @@ namespace caramel
        * @param[in] count The size of the container.
        * @param[in] The value to initialize elements from.
        */
-      constexpr small_dynamic_array(size_type count,
-                                    const_reference value) requires std::copyable<value_type> :
+      constexpr small_dynamic_array(size_type count, const_reference value) :
          m_underlying{count, value}
       {}
       /**
@@ -1697,9 +1695,7 @@ namespace caramel
        * @param[in] count The size of the container.
        * @param[in] The value to initialize elements from.
        */
-      constexpr dynamic_array(size_type count,
-                              const_reference value) requires std::copyable<value_type> :
-         m_underlying{count, value}
+      constexpr dynamic_array(size_type count, const_reference value) : m_underlying{count, value}
       {}
       /**
        * @brief Construct the container with the contents of the initializer list init.

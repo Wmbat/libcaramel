@@ -1,5 +1,7 @@
 #pragma once
 
+#include <libcaramel/iterators/iterator_facade.hpp>
+
 #include <iterator>
 
 namespace caramel
