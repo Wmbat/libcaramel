@@ -1,11 +1,7 @@
-cxx.std = experimental
-cxx.features.modules = true
+cxx.std = c++20
 
 using cxx
 
-assert $cxx.features.modules "no modules support for $cxx.signature"
-
-mxx{*}: extension = mpp
 hxx{*}: extension = hpp
 ixx{*}: extension = ipp
 txx{*}: extension = tpp

@@ -3,7 +3,7 @@ impl_libs = # Implementation dependencies.
 
 import intf_libs += gsl%lib{gsl}
 
-./: lib{caramel}: {mxx hxx cxx}{** -version} \
+./: lib{caramel}: {hxx cxx}{** -version} \
   hxx{version} $impl_libs $intf_libs
 
 # Include the generated version header into the distribution (so that we don't
@@ -46,7 +46,7 @@ else
 # Install into the libcaramel/ subdirectory of, say, /usr/include/
 # recreating subdirectories.
 #
-{mxx hxx}{*}:
+{hxx}{*}:
 {
   install         = include/libcaramel/
   install.subdirs = true
