@@ -2,6 +2,8 @@
 
 #include <iterator>
 #include <libcaramel/iterators/iterator_facade.hpp>
+#include <libcaramel/iterators/random_iterator.hpp>
+#include <type_traits>
 #include <vector>
 
 using namespace caramel;
@@ -65,7 +67,6 @@ TEST_SUITE("iterator_facade test suite") // NOLINT
 {
    TEST_CASE("Create an iota_iterator") // NOLINT
    {
-
       iota_iterator it;
       iota_iterator stop{44}; // NOLINT
       CHECK((stop - it) == 44);
@@ -103,7 +104,7 @@ TEST_SUITE("iterator_facade test suite") // NOLINT
       struct deref_iter : iterator_facade<deref_iter>
       {
          int* value = nullptr;
-         int& dereference() const noexcept { return *value; }
+         [[nodiscard]] auto dereference() const noexcept -> int& { return *value; }
 
          deref_iter(int& i) : value(&i) {}
       };
