@@ -65,7 +65,6 @@ TEST_SUITE("iterator_facade test suite") // NOLINT
 {
    TEST_CASE("Create an iota_iterator") // NOLINT
    {
-
       iota_iterator it;
       iota_iterator stop{44}; // NOLINT
       CHECK((stop - it) == 44);
