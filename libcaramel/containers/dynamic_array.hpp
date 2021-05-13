@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include <libcaramel/iterators/random_iterator.hpp>
+#include <libcaramel/iterators/contiguous_iterator.hpp>
 #include <libcaramel/memory/memory_allocator.hpp>
 #include <libcaramel/util/types.hpp>
 
@@ -77,8 +77,8 @@ namespace caramel
       using const_reference = const value_type&;
       using pointer = typename Allocator::pointer;
       using const_pointer = typename Allocator::const_pointer;
-      using iterator = random_access_iterator<value_type>;
-      using const_iterator = random_access_iterator<const value_type>;
+      using iterator = contiguous_iterator<value_type>;
+      using const_iterator = contiguous_iterator<const value_type>;
       using reverse_iterator = std::reverse_iterator<iterator>;
       using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 

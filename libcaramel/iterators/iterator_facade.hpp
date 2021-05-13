@@ -129,6 +129,9 @@ namespace caramel
       concept random_access_iter = sized_sentinel_of<Any, Any> and can_advance<Any>;
 
       template <typename Any>
+      concept contiguous_iter = bool(Any::is_contiguous_iterator);
+
+      template <typename Any>
       concept bidirectional_iter = random_access_iter<Any> or can_decrement<Any>;
 
       template <typename Any>
@@ -301,7 +304,11 @@ namespace std
       // Pick the iterator category based on the interfaces that it provides
       using iterator_category = std::conditional_t<
          // Random access?
-         caramel::detail::random_access_iter<Derived>, std::random_access_iterator_tag,
+         caramel::detail::random_access_iter<Derived>, std::conditional_t<
+            // Contiguous?
+            caramel::detail::contiguous_iter<Derived>, std::contiguous_iterator_tag, 
+            // Nope
+            std::random_access_iterator_tag>,
          // Nope
          std::conditional_t<
             // Bidirectional?
