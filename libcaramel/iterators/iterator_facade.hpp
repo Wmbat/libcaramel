@@ -301,26 +301,21 @@ namespace std
       using reference = decltype(*_const_it);
       using pointer = decltype(_const_it.operator->());
 
+      // clang-format off
+
       // Pick the iterator category based on the interfaces that it provides
       using iterator_category = std::conditional_t<
-         // Random access?
-         caramel::detail::random_access_iter<Derived>, std::conditional_t<
-            // Contiguous?
-            caramel::detail::contiguous_iter<Derived>, std::contiguous_iterator_tag, 
-            // Nope
+         caramel::detail::random_access_iter<Derived>, 
+         std::conditional_t<caramel::detail::contiguous_iter<Derived>, 
+            std::contiguous_iterator_tag, 
             std::random_access_iterator_tag>,
-         // Nope
-         std::conditional_t<
-            // Bidirectional?
-            caramel::detail::bidirectional_iter<Derived>, std::bidirectional_iterator_tag,
-            // Noh
-            std::conditional_t<
-               // Is it single-pass?
-               caramel::detail::single_pass_iter<Derived>,
-               // Than means it is an input iterator
+         std::conditional_t<caramel::detail::bidirectional_iter<Derived>, 
+            std::bidirectional_iterator_tag,
+            std::conditional_t<caramel::detail::single_pass_iter<Derived>,
                std::input_iterator_tag,
-               // Otherwise it is a forward iterator
                std::forward_iterator_tag>>>;
+
+      // clang-format on
 
       using iterator_concept = iterator_category;
    };
