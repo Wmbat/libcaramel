@@ -1,5 +1,6 @@
 #include <doctest/doctest.h>
 
+#include <libcaramel/containers/concepts.hpp>
 #include <libcaramel/containers/dynamic_array.hpp>
 
 #include <compare>
@@ -26,6 +27,8 @@ TEST_SUITE("dynamic_array test suite") // NOLINT
 {
    TEST_CASE("default ctor") // NOLINT
    {
+      static_assert(caramel::sequence_container<dynamic_array<simple_class>>);
+
       SUBCASE("copyable")
       {
          dynamic_array<simple_class> arr;

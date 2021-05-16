@@ -1,4 +1,4 @@
-@page iterator_facade
+@page Iterator-Facade
 
 # Iterator Facade
 

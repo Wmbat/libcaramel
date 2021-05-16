@@ -1,3 +1,3 @@
-@page memory_resources
+@page Memory-Resources
 
 # Memory Resources

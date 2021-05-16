@@ -4,10 +4,12 @@
  * @copyright Copyright (C) 2021 wmbat.
  */
 
-#pragma once
+#ifndef LIBCARAMEL_CONTAINERS_DYNAMIC_ARRAY_HPP
+#define LIBCARAMEL_CONTAINERS_DYNAMIC_ARRAY_HPP
 
 #include <libcaramel/iterators/random_iterator.hpp>
 #include <libcaramel/memory/memory_allocator.hpp>
+#include <libcaramel/util/in_place.hpp>
 #include <libcaramel/util/types.hpp>
 
 #include <gsl/gsl_assert>
@@ -47,13 +49,6 @@ namespace caramel::detail
 
 namespace caramel
 {
-   struct in_place_t
-   {
-      explicit constexpr in_place_t() = default;
-   };
-
-   inline constexpr in_place_t in_place;
-
    /**
     * @author wmbat wmbat@protonmail.com
     * @date Sunday, 13th of december 2020
@@ -655,12 +650,13 @@ namespace caramel
        * @pre pos <= end()
        *
        * @param[in] pos Iterator before which the content will be inserted. pos may be the end()
+       * @param[in] in_place Tag used to signify insertion with in place construction.
        * @param[in] args Arguments to forward to the constructor of the element.
        *
        * @return Iterator pointing to the inserted value.
        */
       template <typename... Args>
-      constexpr auto insert(const_iterator pos, Args... args) -> iterator
+      constexpr auto insert(const_iterator pos, in_place_t, Args... args) -> iterator
       {
          Expects(pos >= cbegin());
          Expects(pos <= cend());
@@ -1483,14 +1479,15 @@ namespace caramel
        * @pre pos <= end()
        *
        * @param[in] pos Iterator before which the content will be inserted. pos may be the end()
+       * @param[in] in_place Tag used to signify insertion with in place construction.
        * @param[in] args Arguments to forward to the constructor of the element.
        *
        * @return Iterator pointing to the inserted value.
        */
       template <typename... Args>
-      constexpr auto insert(const_iterator pos, Args... args) -> iterator
+      constexpr auto insert(const_iterator pos, in_place_t in_place, Args... args) -> iterator
       {
-         return m_underlying.insert(pos, std::forward<Args>(args)...);
+         return m_underlying.insert(pos, in_place, std::forward<Args>(args)...);
       }
       /**
        * @brief Inserts count elements from a specified value.
@@ -1968,14 +1965,15 @@ namespace caramel
        * @pre pos <= end()
        *
        * @param[in] pos Iterator before which the content will be inserted. pos may be the end()
+       * @param[in] in_place Tag used to signify insertion with in place construction.
        * @param[in] args Arguments to forward to the constructor of the element.
        *
        * @return Iterator pointing to the inserted value.
        */
       template <typename... Args>
-      constexpr auto insert(const_iterator pos, Args... args) -> iterator
+      constexpr auto insert(const_iterator pos, in_place_t in_place, Args... args) -> iterator
       {
-         return m_underlying.insert(pos, std::forward<Args>(args)...);
+         return m_underlying.insert(pos, in_place, std::forward<Args>(args)...);
       }
       /**
        * @brief Inserts count elements from a specified value.
@@ -2136,3 +2134,5 @@ namespace caramel
    template <typename Iter>
    dynamic_array(Iter, Iter) -> dynamic_array<typename std::iterator_traits<Iter>::value_type>;
 } // namespace caramel
+
+#endif // LIBCARAMEL_CONTAINERS_DYNAMIC_ARRAY_HPP

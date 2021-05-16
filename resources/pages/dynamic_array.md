@@ -1,3 +1,3 @@
-@page dynamic_array 
+@page Dynamic-Array
 
 # Dynamic Array
