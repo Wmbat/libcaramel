@@ -28,6 +28,9 @@ jobs:
           # Working directory
           working-directory: "." # default is .
 
+      - name: print directory
+        run: ls
+
       - name: Publish
         uses: peaceiris/actions-gh-pages@v3
         with:
