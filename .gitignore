@@ -1,0 +1,5 @@
+compile_commands.json
+build/
+tests/
+.bdep/
+.cache/
