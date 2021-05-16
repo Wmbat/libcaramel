@@ -2,13 +2,8 @@ name: Documentation
 
 on:
   push:
-    branches:
-      - "master"
-
-# on:
-#   push:
-#     tags:
-#       - "*"
+    tags:
+      - "*"
 
 jobs:
   build:
@@ -27,9 +22,6 @@ jobs:
           doxyfile-path: "./Doxyfile" # default is ./Doxyfile
           # Working directory
           working-directory: "." # default is .
-
-      - name: print directory
-        run: ls
 
       - name: Publish
         uses: peaceiris/actions-gh-pages@v3
