@@ -1,7 +1,9 @@
 /**
  * @file containers/dynamic_array.hpp
- * @brief Contains the dynamic_array API.
+ * @author wmbat wmbat@protonmail.com
+ * @date Sunday, 13th of december 2020
  * @copyright Copyright (C) 2021 wmbat.
+ * @brief Contains the dynamic_array API.
  */
 
 #ifndef LIBCARAMEL_CONTAINERS_DYNAMIC_ARRAY_HPP
@@ -50,10 +52,7 @@ namespace caramel::detail
 namespace caramel
 {
    /**
-    * @author wmbat wmbat@protonmail.com
-    * @date Sunday, 13th of december 2020
     * @brief A resizable array with a small statically allocated storage buffer
-    * @copyright MIT License
     *
     * @tparam Any The type of the elements
     * @tparam Size The size of the staticly allocated small buffer.
@@ -1167,10 +1166,7 @@ namespace caramel
    basic_dynamic_array(Any, U...) -> basic_dynamic_array<Any, 1 + sizeof...(U), Allocator>;
 
    /**
-    * @author wmbat wmbat@protonmail.com
-    * @date Sunday, 13th of december 2020
     * @brief A resizable array with a small statically allocated storage buffer
-    * @copyright MIT License
     *
     * @tparam Any The type of the elements
     * @tparam Size The size of the staticly allocated small buffer.
@@ -1655,10 +1651,7 @@ namespace caramel
    small_dynamic_array(Any, U...) -> small_dynamic_array<Any, 1 + sizeof...(U)>;
 
    /**
-    * @author wmbat wmbat@protonmail.com
-    * @date Sunday, 13th of december 2020
     * @brief A resizable array
-    * @copyright MIT License
     *
     * @tparam Any The type of the elements
     */

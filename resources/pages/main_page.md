@@ -17,6 +17,7 @@ containers may belong to categories as follows:
 **Sequence** containers are data structures that may be accessed sequentially.
 
 - caramel::dynamic_array - See @ref Dynamic-Array for more info
+- caramel::chained_group
 - caramel::deque
 
 ## Adaptors
